@@ -1,0 +1,1 @@
+{'key0': 'overwrite', 'key1': 'key1', 'key10': 'new key', 'sec0': {'key0': '', 'key1': 'key1', 'sec0': {'key0': 'overwrite', 'key1': 'sec0-key1', 'key10': 'newkey'}}, 'sec1': {'key0': '', 'key1': 'key1', 'sec0': {'key0': 'sec0-key0', 'key1': 'sec0-key1'}}, 'sec2': {'sec0': {'key0': '', 'key1': 'key1'}}}

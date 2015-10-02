@@ -1,0 +1,11 @@
+# ------------------------
+# complex config component
+# ------------------------
+
+key.+ = .+ # accept all
+
+[ subsec[a-z]+ ]
+@inherit (conf14.vrf)
+keyupper2 = [A-Z]+
+keyupper0 = [a-z]+ # accept modification
+keyupper1 = [A-Z]+

@@ -1,0 +1,16 @@
+# ------------------------
+# complex config component
+# ------------------------
+
+keyempty = '' # accept empty
+.+ = .+ # accept all
+
+[ sec\w+ ]
+    .+ = .+ # accept all(non empty)
+    [[ sec\w+ ]]
+    ^keyup = .+  # Error: missing mandatory key
+    .+ = .+
+
+        [[[ sec\w+ ]]]
+        ^key\w+ = .+
+        .+ = .+

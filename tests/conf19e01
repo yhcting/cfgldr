@@ -1,0 +1,9 @@
+# --------------
+# Final key Test
+# --------------
+@inherit (conf19)
+
+key0 = key000
+
+[ Sect ]
+!finkey = error  # try to overwrite final key.

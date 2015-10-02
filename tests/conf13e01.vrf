@@ -1,0 +1,5 @@
+# -------------------------
+# simple test with verifier
+# -------------------------
+
+@include (conf13.vrf)

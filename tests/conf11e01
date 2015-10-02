@@ -1,0 +1,19 @@
+@inherit (conf07)
+key0=overwrite
+key10 = new key
+
+[sec0]
+    @include (conf07)
+    @inherit (conf08)
+    # inherit again and again is allowed.
+    # because, inherited section/key can be merged/overwritten
+    @inherit (conf08)
+    [[sec0]]
+        key0=overwrite
+        key10 = newkey
+        @inherit (conf07)  # [ERR] key0 is duplicated here.
+
+[sec1]
+    @include (conf07)
+    @inherit (conf08)
+    @include (conf08)

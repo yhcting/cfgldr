@@ -1,0 +1,16 @@
+# ------------------------
+# complex config component
+# ------------------------
+
+keyempty = '' # accept empty
+.+ = .+ # accept all
+
+[ sec\w+ ]
+    .+ = .+ # accept all(non empty)
+    [[ sec\w+ ]]
+    ^keylow = .+
+    .+ = .+
+
+        [[[ sec\w+ ]]]
+        ^key\w+ = .+
+        .+ = .+

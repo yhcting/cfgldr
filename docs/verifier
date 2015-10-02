@@ -1,0 +1,42 @@
+-----
+Usage
+-----
+* verify rule of config file.
+
+
+-----
+Rules
+-----
+* Basic syntax is same with config-file-syntax
+
+* Token is 'regular expression(regex)' without white-space.
+  And, key value should be also regex-token.
+
+* regex try to match whole word. That is,
+  It is like leading '^' and trailing '$' are added automatically.
+  So, leading '^' can be reserved for different usage (See 'prefix' part below)
+
+* Rule is checked with order - from top to bottom.
+  That is, first described rule is matched at first.
+  If matching rule for key name is found, value-verifying is proceeded.
+  If it fails, result is failure.
+  NOTE that, verifier DOESN'T move to next rules to find another rule.
+
+* special prefix character is used at key.
+  '^': mandatory key (key that should be defined.)
+       Mandatory property may be overwritten by property of inherited key.
+       << example >>
+       @inherit (verifier) # '^key = [a-z]+' is defined. 'key' is mandatory.
+       key = [a-z]+        # Now, 'key' is NOT mandatory.
+
+* special prefix character is used at key value.
+  '^': following expression is NOT regex (special meaning)
+       (NOT IMPLEMENTED YET)
+
+  << example >>
+  ^version = .*  # version is mandatory key.
+  version = '=*' # =* is used as regex.
+  version = '#+[a-b]*'
+  [ sect\w+ ]
+    @include (rule.01)
+    ver[0-9] = [0-9]+

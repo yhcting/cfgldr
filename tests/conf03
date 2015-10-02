@@ -1,0 +1,41 @@
+# --------------------
+# key/value statements
+# --------------------
+
+# simple statements
+key0 =
+ key1 =
+      key2   =
+key3 = this is unquoted key
+key4 = ' single quoted key'
+  key5 = " double quoted key "
+key6 = unquoted key again
+key7 = '''triple single quoted key'''
+key8 = ''' multiline
+triple
+single
+quoted
+key '''
+  key9 = """triple double quoted key"""
+   key10 =    """triple double
+quoted
+multiline
+key"""
+
+# more complex cases
+key11 =     key with comment # key comment # this is...
+key12 = ' test for # in quote'    #comment again...
+key13 = ''' multiline
+string
+with # in quotes
+OK??
+''' # this is real comment.
+  key14 = '''
+"""in multile quoted string...
+''' # possible.
+key15 = """ # this should not be
+handled as comment
+"""   # this is comment.
+
+# special syntax that # is included as key value
+key16 = value#This is NOT COMMET

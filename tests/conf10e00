@@ -1,0 +1,9 @@
+@include (conf07)
+key0=  # [ERR] this is duplicated key. already included at conf07
+
+[sec0]
+    @include (conf07)
+    @include (conf08)
+
+[sec1]
+    @include (conf08)

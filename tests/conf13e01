@@ -1,0 +1,8 @@
+# -------------------------
+# simple test with verifier
+# -------------------------
+
+keylower = abcd
+keyunknown = 10  # Fail this is unknown key.
+keynum = 0000
+keyupper = ABCD

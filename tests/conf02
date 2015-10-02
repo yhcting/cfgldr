@@ -1,0 +1,58 @@
+# --------
+# comments
+# --------
+
+#
+     #
+
+# normal comment
+    # comment again
+           # this is comment too
+
+#normal comment
+    #comment again
+           #thjis is comment too
+
+# there is # in comment
+   # there is # in comment.
+#there is # in comment
+   #there is # in comment.
+
+# comments with valid syntax
+# --------------------------
+#key=value
+# key = 'my value'
+    # key = ''' this is vaule '''
+    #key = ''' this is vaule '''
+# [ section ]
+#[ section ]
+   # [section] # comment
+   #[section] #comment
+   # [[ section ]]   # comment
+   #[[ section ]]   #comment
+
+#@command(sample)
+#   @command (test)
+   #@command(test00) # comment..
+   # @command(test00) # comment..
+
+
+# comments with invalid syntax
+# --------------------------
+#key+inval=
+# key+inval=
+#key+inval = value value
+# key+inval = value value
+    #key+inval=
+    # key+inval=
+#[ sec+tion ]
+# [ sec+tion ]
+    #[sec+tion]
+    # [sec+tion]
+#{sec}
+# {sec}
+#@com+mand (func)
+# @com+mand (func)
+
+
+#

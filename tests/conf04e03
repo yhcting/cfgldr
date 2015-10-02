@@ -1,0 +1,7 @@
+[ sec0 ]
+    [[ sec1 ]]
+
+[ sec1 ]
+    [[ sec2 ]]
+
+[ sec0 ]  # [ERR] duplicated section name

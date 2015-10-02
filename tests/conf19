@@ -1,0 +1,7 @@
+# --------------
+# Final key Test
+# --------------
+@inherit (conf18)
+
+key0 = key0-overwrite
+!key1 = finkey1

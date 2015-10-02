@@ -1,0 +1,6 @@
+# --------------
+# Final key Test
+# --------------
+@inhert (conf18)
+
+finkey = hoho  # error: try to overwrite final key.

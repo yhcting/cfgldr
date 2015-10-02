@@ -1,0 +1,29 @@
+Token
+=====
+Syntax unit of configuration.
+Whitespace characters(' \t\n') are NOT ALLOWED as token.
+
+'[' : start of section
+']' : end of section
+'@' : command key prefix
+'#' : comment prefix
+string: key/section name, key value and so on.
+
+Syntax
+======
+Comment: '# comment....'
+Command: '@name' + '(argument)'
+Section: '[' + name(Token) + ']' + comment(optional)
+Key/Value: 'key' + '='(Token) + 'value' + comment(optional)
+
+* special key syntax
+!key: This means 'Non-overwritable' key (final key).
+      This key cannot be overwrite at any case.
+
+Each tokes SHOULD BE SEPARATED with AT LEAST one space/tab characters
+That is, '+' means one ore more whitespaces.
+See following example. '#' without leading 'space' has different meaning.
+
+key = value
+key = value#This is NOT comment
+key = value #This is comment

@@ -1,0 +1,9 @@
+sec0=  # [ERR] this is duplicated key. sec0 is also used as section name at conf08
+@include (conf08)
+
+[sec0]
+    @include (conf07)
+    @include (conf08)
+
+[sec1]
+    @include (conf08)

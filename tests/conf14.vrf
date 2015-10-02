@@ -1,0 +1,10 @@
+# ----------------
+# config component
+# ----------------
+
+
+keyupper0 = ABCD
+keyword[0-9] = \w+
+keyl[a-z]+[0-9] = [a-z]+ # accept only lower case value
+keynum[0-9] = [0-9]+
+

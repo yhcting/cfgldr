@@ -1,0 +1,7 @@
+[sec0]
+    @include (conf07)
+    @inherit (conf08)
+    @include (conf08)
+
+    [[sec0 ]]  # [ERR] duplicated Section
+        key0=

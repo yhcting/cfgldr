@@ -1,0 +1,10 @@
+# --------------
+# Final key Test
+# --------------
+@inhert (conf18)
+
+key0 = key00
+
+[ Sect ]
+key1 = key11
+finkey = error  # overwrite finkey again...

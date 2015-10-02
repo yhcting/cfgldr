@@ -1,0 +1,8 @@
+# ------------------------------
+# Conf file included other tests.
+# So, BE CAREFUL for changing key name
+# ------------------------------
+
+[ sec0 ]
+    key0 = sec0-key0
+    key1 = sec0-key1

@@ -1,0 +1,7 @@
+# -------------------------
+# simple test with verifier
+# -------------------------
+
+keyupper = ABCD
+keylower = abcd
+keynum = 0000

@@ -1,0 +1,10 @@
+[ sec0 ]
+    [[ sec1 ]]
+        key0 = -
+        key1 =
+        key0 =  # [ERR] duplicated key in subsection
+
+[ sec1 ]
+    [[ sec2 ]]
+
+

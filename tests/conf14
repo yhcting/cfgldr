@@ -1,0 +1,12 @@
+# ----------------
+# config component
+# ----------------
+
+keyupper0 = ABCD
+keylower0 = abcd
+keylower1  = lower
+keynum0 = 0000
+keynum1 = 02302
+keynum2 =   33200
+keyword0 = 'aA0_'
+keyword1 = aA0_

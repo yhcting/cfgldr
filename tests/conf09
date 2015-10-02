@@ -1,0 +1,6 @@
+# -----------------------
+# simple sample - include
+# -----------------------
+
+@include (conf07)
+key100 = value100

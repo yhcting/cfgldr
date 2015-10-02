@@ -1,0 +1,43 @@
+# ------------------
+# Command statements
+# ------------------
+
+
+@inherit (conf00)
+    @inherit (conf00)
+@inherit  (conf00)
+    @inherit    (conf00)
+@inherit (conf00)
+    @inherit (conf00)
+
+# command - multiline argument
+@inherit (
+conf00
+)
+@inherit (
+conf00
+)
+
+@inherit (
+conf00
+)
+@inherit (
+    conf00
+)
+
+
+    @inherit (
+        conf00
+)
+
+    @inherit (
+
+    conf00
+
+)
+
+
+@inherit (conf00)
+
+@inherit (conf00
+)

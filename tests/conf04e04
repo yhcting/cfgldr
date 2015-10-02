@@ -1,0 +1,5 @@
+sec0 =
+
+[ sec0 ]  # [ERR] duplicated name
+    [[ sec1 ]]
+

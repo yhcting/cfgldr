@@ -1,0 +1,7 @@
+[ sec0 ]
+    [[ sec1 ]]]  # [ERR] section bracket mismatch
+
+[ sec1 ]
+[ sec2 ]
+
+

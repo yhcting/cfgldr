@@ -1,0 +1,13 @@
+# -----------------------
+# simple sample - include
+# -----------------------
+
+@include (conf07)
+key100 = value100
+
+[ sec0 ]
+    @include (conf07)
+    @include (conf08)
+
+[ sec1 ]
+    @include (conf08)

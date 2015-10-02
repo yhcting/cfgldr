@@ -1,0 +1,7 @@
+# -------------------------
+# simple test with verifier
+# -------------------------
+
+keylower = abcd
+keynum = 000a0  # This should shows error
+keyupper = ABCD

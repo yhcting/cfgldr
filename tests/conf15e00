@@ -1,0 +1,7 @@
+# ------------------------
+# complex config component
+# ------------------------
+
+@include (conf15)
+
+[ unknownsect ]

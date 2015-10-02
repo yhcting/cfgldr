@@ -1,0 +1,8 @@
+# ------------------------
+# complex config component
+# ------------------------
+
+@inherit (conf15)
+
+[ subseclower ]
+keylower1  = lower1111 # Error this replace old-correct value with incorrect one.

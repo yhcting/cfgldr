@@ -1,0 +1,53 @@
+# ----------------
+# Mixed statements
+# ----------------
+
+# This is mixed test.
+
+@inherit (conf00)
+@inherit (conf00)
+
+@include  (conf00)
+@include (conf00)
+
+rootkey0 =
+rootkey1 = ' this is root key' # test key
+rootkey2 =  rootkey 2 is defined here... ok?
+rootkey3 =  '''
+this is multiline
+rootkey
+'''
+
+[ Sect0 ]
+    name = 1st depth
+    key0 =  first key
+
+    [[ Sect00 ]]
+        @include (conf00)
+        name = 2nd depth
+        key0 = ' hohoho'
+
+        [[[ Sect000 ]]]
+            # leaf section
+            name = 3rd depth
+            key0 = ok ok ok # dummy key
+
+    [[ Sec01 ]] # up to parent section
+        name = 2nd-1 depth
+        key0 = again
+
+        [[[ Sect010 ]]]
+            # child again
+            name = 3rd-1 depth
+            key0 = '3rd'
+
+[ Sect1 ]
+    # jump to 1st depth section
+    name = 1st-1 depth
+    key0 = firstkey again
+
+[ Sect2 ]
+    name =
+    key0 =
+
+
