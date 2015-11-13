@@ -1,6 +1,7 @@
 import re
 
 import logger
+import section
 from section import Sect
 from errors import VerificationError
 
@@ -24,7 +25,7 @@ def _verify_sect(csct, cscsi, vsct, vscsi):
     # check mandatory key
     mank = {}  # mandatory keys.
     for vk in vsct:
-        if vsct.is_mandatory(vk):
+        if vsct.is_ki_set(vk, section.KIMAN):
             mank[vk] = False
 
     for ck in csct:

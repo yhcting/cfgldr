@@ -1,0 +1,30 @@
+# --------------
+# * Escape character
+# * Named replacement
+# --------------
+
+# escape character is used
+key00 = 'hohoho\'hohoho'
+key01 = "hehehe''hoho\"\"\\hohoho"
+key02 = hooo\\eje\\  # there is no escape character at unquoted string
+key03 = '''hehhe\'he
+eoee\\\'
+'''
+key04 = """hehhe\"he
+eoee\\\"
+"""
+
+_tmpk = MyTemp
+#_tmpk00 = test0
+#_tmpk01 = test1
+#_tmpk02 = test2
+# referencing previous keys by using named replacement
+key05 = ++{_tmpk}++
+key07 = **{key05}**
+key08 = ++{{_tmpk}}++
+
+[ sec0 ]
+_tmpk = SecTmp
+key0 = ++{_tmpk}++
+
+

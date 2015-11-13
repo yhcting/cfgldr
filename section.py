@@ -10,9 +10,12 @@ P.set_level(P.ERROR)
 
 # Key info attribute
 _KIWR = 'wr'  # writable
-_KIMAN = 'man'  # mandatory
-_KIFIN = 'fin'  # final
 _KICSI = 'csi'  # context stack info
+
+# Public ki
+KIFIN = 'fin'  # final
+KITMP = 'tmp'  # temp key
+KIMAN = 'man'  # mandatory
 
 
 class Sect(OrderedDict):
@@ -37,9 +40,10 @@ class Sect(OrderedDict):
     def _init_ki(self, k):
         self._ki[k] = {
             _KIWR: False,
-            _KIMAN: False,
-            _KIFIN: False,
             _KICSI: None,
+            KIMAN: False,
+            KIFIN: False,
+            KITMP: False,
         }
 
     def _setro(self, k):
@@ -63,8 +67,7 @@ class Sect(OrderedDict):
             if (recursive
                     and isinstance(self[k], Sect)):
                 self[k].set_writable(None)
-            if not self.is_final(k):
-                self._setrw(k)
+            self._setrw(k)
 
     def set_readonly(self, key=None, recursive=True):
         """
@@ -80,22 +83,30 @@ class Sect(OrderedDict):
             self._setro(k)
 
     def is_readonly(self, k):
+        if not k in self:
+            return False
+        # order is important (means priority of attribute).
+        if self._ki[k][KIFIN]:
+            return True
+        if self._ki[k][KITMP]:
+            return False
+        return not self._ki[k][_KIWR]
+
+    def set_ki(self, k, attr, boolv):
+        self._ki[k][attr] = boolv
+
+    def is_ki_set(self, k, attr):
         return (k in self
-                and not self._ki[k][_KIWR])
+                and self._ki[k][attr])
 
-    def set_final(self, k, final):
-        self._ki[k][_KIFIN] = final
-
-    def is_final(self, k):
-        return (k in self
-                and self._ki[k][_KIFIN])
-
-    def set_mandatory(self, k, mandatory):
-        self._ki[k][_KIMAN] = mandatory
-
-    def is_mandatory(self, k):
-        return (k in self
-                and self._ki[k][_KIMAN])
+    def clear_temp_keys(self, recursive=False):
+        ks = self.keys()[:]
+        for k in ks:
+            if (recursive
+                    and isinstance(self[k], Sect)):
+                self[k].clear_temp_keys(True)
+            if self.is_ki_set(k, KITMP):
+                del self[k]
 
     def is_section(self, k):
         return (k in self
@@ -158,11 +169,28 @@ class Sect(OrderedDict):
         return d
 
 
+# ============================================================================
+#
+#
+#
+# ============================================================================
 def test():
     #s = Sect('root')
 
     s0 = Sect('sec0')
     s0['1'] = 1
+    s0['2'] = 2
+    s0['3'] = 3
+
+    assert 3 == s0.pop('3', None)
+    assert not '3' in s0
+    assert None == s0.pop('3', None)
+    s0['3'] = 3
+    s0.set_ki('3', KITMP, True)
+    s0.set_ki('2', KITMP, True)
+    s0.clear_temp_keys()
+    assert not '2' in s0
+    assert not '3' in s0
     s0['2'] = 2
     s0['3'] = 3
 

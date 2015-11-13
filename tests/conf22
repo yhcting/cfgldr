@@ -1,0 +1,9 @@
+# --------------
+# named replacement
+# --------------
+
+[ sect ]
+key%(__filename__)s = ++%(__filename__)s
+
+[ sect_%(__filename__)s__ ]
+key = This is escape %%(__filename__)s ok.

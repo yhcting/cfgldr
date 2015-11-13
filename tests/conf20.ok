@@ -1,0 +1,1 @@
+{'key00': "hohoho'hohoho", 'key01': 'hehehe\'\'hoho""\\hohoho', 'key02': 'hooo\\\\eje\\\\ ', 'key03': "hehhe'he\neoee\\'\n", 'key04': 'hehhe"he\neoee\\"\n', '_tmpk': 'MyTemp', 'key05': '++MyTemp++', 'key07': '**++MyTemp++**', 'key08': '++{_tmpk}++', 'sec0': {'_tmpk': 'SecTmp', 'key0': '++SecTmp++'}}

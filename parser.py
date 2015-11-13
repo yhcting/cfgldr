@@ -5,6 +5,7 @@ import os.path
 import logger
 import verifier
 import pyparsing as pp
+import section
 from section import Sect
 from errors import BaseError, ParseBaseError, ParseError, FileIOError
 
@@ -68,6 +69,7 @@ class ContextManager(object):
     """Context manager"""
     def __init__(self):
         self.cstk = []
+        self.repldict = None  # dictionary for named replacement
 
     @property
     def context(self):
@@ -118,7 +120,8 @@ class ContextManager(object):
         And parsed context is returned.
         """
         P.d('parse_end')
-        self.cstk.pop()
+        c = self.cstk.pop()
+        c.sroot.clear_temp_keys(True)
 
 
 # context manager
@@ -159,6 +162,9 @@ def _merge_section(dst, src, ps, loc):
 
 # return None if success, otherwise error message.
 def _cmdhandle_inherit(ps, loc, v):
+    """
+    Inherit from external config file. Overwriting included keys are allowed.
+    """
     subs = _include_conf(ps, loc, v).sroot
     subs.set_writable()
     _merge_section(_cm.context.cws, subs, ps, loc)
@@ -166,10 +172,27 @@ def _cmdhandle_inherit(ps, loc, v):
 
 # return None if success, otherwise error message.
 def _cmdhandle_include(ps, loc, v):
+    """
+    Include external config file. Overwriting included keys are NOT allowed.
+    """
     s = _cm.context.cws
     subs = _include_conf(ps, loc, v).sroot
     subs.set_readonly()
     _merge_section(s, subs, ps, loc)
+
+
+def _cmdhandle_rmkeys(ps, loc, v):
+    """
+    Remove keys from current working section.
+    """
+    cc = _cm.context
+    s = cc.cws
+    for key in v.split():
+        if key in s:
+            del s[key]
+        else:
+            raise ParseError(cc.file, ps, loc,
+                             'Unknown key : ' + key)
 
 
 _cmdhandler_map = {
@@ -177,7 +200,10 @@ _cmdhandler_map = {
     # Difference is that caller can override section key created by 'inherit'.
     # But, in case of 'include' this case raise 'DuplicatedKey' error.
     'inherit': _cmdhandle_inherit,
-    'include': _cmdhandle_include
+    'include': _cmdhandle_include,
+    # Supporing 'rmkeys' commands may break 'key overwriting protection'.
+    # Therefore, 'rmkeys' command is disabled.
+    #'rmkeys': _cmdhandle_rmkeys
 }
 
 
@@ -235,8 +261,12 @@ def _sect_parse_action(ps, loc, toks):
     cc.spush(parentsect[name])
 
 
-_MANDATORY_KEY_PREFIX = '^'
-_FINAL_KEY_PREFIX = '!'
+_KIMAN_CH = '^'
+_KIFIN_CH = '!'
+_KITMP_CH = '~'
+_KIMAP = {_KIMAN_CH: section.KIMAN,
+          _KIFIN_CH: section.KIFIN,
+          _KITMP_CH: section.KITMP}
 
 
 def _keyvalue_parse_action(ps, loc, toks):
@@ -245,14 +275,15 @@ def _keyvalue_parse_action(ps, loc, toks):
     cc = _cm.context
     k = toks[0]
     assert len(k) > 0
-    mankey = False
-    finkey = False
-    if k[0] == _MANDATORY_KEY_PREFIX:
-        k = k[1:]
-        mankey = True
-    elif k[0] == _FINAL_KEY_PREFIX:
-        k = k[1:]
-        finkey = True
+    kis = {
+        section.KIMAN: False,
+        section.KIFIN: False,
+        section.KITMP: False
+    }
+    for prefix in _KIMAP.keys():
+        if k[0] == prefix:
+            k = k[1:]
+            kis[_KIMAP[prefix]] = True
     if 1 == len(toks):
         v = ''  # empty string by default
     else:
@@ -263,11 +294,14 @@ def _keyvalue_parse_action(ps, loc, toks):
     # replace current context info with this parsing value
     csi.pop()
     csi.append((cc.file, ps, loc))
+
+    # execute named replacement with current working section
     try:
+        v = v.format(**s)
         s[k] = v
         s.set_key_parseinfo(k, csi)
-        s.set_mandatory(k, mankey)
-        s.set_final(k, finkey)
+        for ki in kis:
+            s.set_ki(k, ki, kis[ki])
     except KeyError as e:
         raise ParseError(cc.file, ps, loc, e.message)
 
@@ -327,13 +361,13 @@ def _build_recursive_descent_parser(vrfconf):
     if vrfconf:
         key = word
     else:
-        keyattr_prefix = '[\\' + _FINAL_KEY_PREFIX + r'!]'
+        keyattr_prefix = '[\\' + _KIFIN_CH + '\\' + _KITMP_CH + ']'
         key = pp.Regex(keyattr_prefix + '?' + wordrestr)
 
-    squoted = pp.QuotedString("'")
-    dquoted = pp.QuotedString('"')
-    tsquoted = pp.QuotedString("'''", multiline=True)
-    tdquoted = pp.QuotedString('"""', multiline=True)
+    squoted = pp.QuotedString("'", escChar='\\')
+    dquoted = pp.QuotedString('"', escChar='\\')
+    tsquoted = pp.QuotedString("'''",  escChar='\\', multiline=True)
+    tdquoted = pp.QuotedString('"""',  escChar='\\', multiline=True)
     # unquoted value SHOULD NOT include 'spacestr' leading comments
     unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'(?!#))*')
     value = tdquoted ^ tsquoted ^ dquoted ^ squoted ^ unquoted
@@ -384,7 +418,7 @@ def _parse_conf(ps, loc, fconf):
     """
     :param ps: parse-string
     :param loc: interesting/issued location
-    :param fconf: abs-path for config file.
+    :param fconf: (str) abs-path for config file.
     :return: (Context) context contains parse result.
     """
     assert _is_abspath(fconf)
@@ -403,6 +437,13 @@ def _parse_conf(ps, loc, fconf):
 
         # change new line style : DOS -> UNIX
         content.replace('\r\n', '\n')
+        repldict = _cm.repldict
+        if not repldict is None:
+            try:
+                content = content % repldict
+            except KeyError as e:
+                msg = 'Unknown symbol at named-replacement: %%(%s)s' % e.message
+                raise ParseError(_cm.context.file, None, 0, msg)
         _get_parser().parseString(content, True)
         return _cm.context
     except IOError:
@@ -418,7 +459,7 @@ def _parse_conf(ps, loc, fconf):
         _cm.parse_end()
 
 
-def parse_conf(fconf, fverifier):
+def parse_conf(fconf, fverifier, confdict, vrfdict):
     """
     Parse config file and gives root section as result.
     :param fconf: config file path
@@ -426,6 +467,7 @@ def parse_conf(fconf, fverifier):
     :return: (section.Sect) root section.
     """
     fconf = os.path.abspath(fconf)
+    _cm.repldict = confdict
     _set_parser(_cpsr)
     ctxt = _parse_conf(None, -1, fconf)
     csct = ctxt.sroot  # config section
@@ -433,6 +475,7 @@ def parse_conf(fconf, fverifier):
     vsct = None  # verifier section
     vfconf = None
     if None is not fverifier:
+        _cm.repldict = vrfdict
         _set_parser(_vpsr)
         ctxt = _parse_conf(None, -1, fverifier)
         vsct = ctxt.sroot
@@ -440,13 +483,13 @@ def parse_conf(fconf, fverifier):
     verifier.verify_conf(csct, cfconf, vsct, vfconf)
     _set_parser(None)
     return csct
+
+
 # ============================================================================
 #
 #
 #
 # ============================================================================
-
-
 def test():
     import os
 
@@ -462,7 +505,16 @@ def test():
         #cfg.setDebug()
         #print('Testing : %s\n' % fconf)
         try:
-            sroot = parse_conf(fconf, fverifier)
+            confdict = {
+                '__filename__': os.path.basename(fconf)
+            }
+            if fverifier is None:
+                vrfdict = None
+            else:
+                vrfdict = {
+                    '__filename__': os.path.basename(fverifier)
+                }
+            sroot = parse_conf(fconf, fverifier, confdict, vrfdict)
             if not expectok:
                 P.e('Failure is expected. But success! : %s\n' % fconf)
                 assert False

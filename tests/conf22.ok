@@ -1,0 +1,1 @@
+{'sect': {'keyconf22': '++conf22'}, 'sect_conf22__': {'key': 'This is escape %(__filename__)s ok.'}}

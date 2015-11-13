@@ -1,3 +1,5 @@
+_UNIQ_DUMMY_OBJ = object()
+
 
 def __newobj__(cls, *args):
     # Hack for pickle
@@ -70,11 +72,11 @@ class OrderedDict(dict):
         for k in f:
             self[k] = f[k]
 
-    def pop(self, k, d=None):
+    def pop(self, k, d=_UNIQ_DUMMY_OBJ):
         try:
             v = self[k]
         except KeyError:
-            if d is None:
+            if d is _UNIQ_DUMMY_OBJ:
                 raise
             v = d
         else:
@@ -122,5 +124,15 @@ class OrderedDict(dict):
         return iter(self.values())
 
 
+# ============================================================================
+#
+#
+#
+# ============================================================================
+def test():
+    od = OrderedDict()
+    od['a'] = 'A'
+    assert None is od.pop('b', None)
+
 if '__main__' == __name__:
-    pass
+    test()

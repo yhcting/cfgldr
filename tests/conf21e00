@@ -1,0 +1,8 @@
+# --------------
+# Temp key
+# --------------
+
+key0 = k0
+~tmpk = hoho
+tmpk = hoho  # now tmpk is permanent
+tmpk = hehe  # error here!

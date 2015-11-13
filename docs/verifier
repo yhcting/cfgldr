@@ -23,6 +23,7 @@ Rules
   NOTE that, verifier DOESN'T move to next rules to find another rule.
 
 * special prefix character is used at key.
+  See 'special key syntax' at syntax documents at first.
   '^': mandatory key (key that should be defined.)
        Mandatory property may be overwritten by property of inherited key.
        << example >>

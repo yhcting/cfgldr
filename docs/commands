@@ -6,3 +6,8 @@ Include parsed result of given file at the position
 @inherit
 --------
 Same with '@include' except for that inherited data can be overwritten.
+
+
+@rmkeys
+-------
+Remove keys from current section.

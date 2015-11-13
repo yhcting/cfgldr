@@ -15,10 +15,24 @@ Comment: '# comment....'
 Command: '@name' + '(argument)'
 Section: '[' + name(Token) + ']' + comment(optional)
 Key/Value: 'key' + '='(Token) + 'value' + comment(optional)
+Named-replacement: following named-replacement syntax of python - %()s.
 
+
+Named-replacement
+-----------------
+%()s is replaced based on replacement dictionary.
+See loader.py:load_config() function
+Named replacement is processed BEFORE parsing conf file.
+
+Key/Value
+---------
 * special key syntax
 !key: This means 'Non-overwritable' key (final key).
       This key cannot be overwrite at any case.
+~key: Temp key. Key is removed after parsing current config file.
+      Temp key is always overwritable.
+
+
 
 Each tokes SHOULD BE SEPARATED with AT LEAST one space/tab characters
 That is, '+' means one ore more whitespaces.
@@ -27,3 +41,14 @@ See following example. '#' without leading 'space' has different meaning.
 key = value
 key = value#This is NOT comment
 key = value #This is comment
+
+* Value: syntax
+unquoted string: there is no escape character.
+single-line quoted string: quoted by ' or ". \ is used as escaped char.
+multi-line quoted string: qutoed by ''' or """. \ is used as escaped char.
+
+* Value: key replacement
+Named-key-replacement of python is processed with keys with current section
+on value string
+So, "{key}" is replaced with key value.
+(The way for escaping this is same with python - use '{{key}}')

@@ -1,0 +1,5 @@
+key0 = hoho
+key1 = hehe
+
+[ sec0 ]
+key0 = ++{key1}++  # error. 'key1' is NOT in current section.
