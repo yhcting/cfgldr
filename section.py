@@ -10,7 +10,7 @@ P.set_level(P.ERROR)
 
 # Key info attribute
 _KIWR = 'wr'  # writable
-_KICSI = 'csi'  # context stack info
+_KIPI = 'pi'  # context stack info
 
 # Public ki
 KIFIN = 'fin'  # final
@@ -40,7 +40,7 @@ class Sect(OrderedDict):
     def _init_ki(self, k):
         self._ki[k] = {
             _KIWR: False,
-            _KICSI: None,
+            _KIPI: None,
             KIMAN: False,
             KIFIN: False,
             KITMP: False,
@@ -112,18 +112,18 @@ class Sect(OrderedDict):
         return (k in self
                 and isinstance(self[k], Sect))
 
-    def set_key_parseinfo(self, k, csi):
+    def set_key_parseinfo(self, k, pi):
         """
         :param k:
-        :param csi: context stack info array of (file, ps, loc) tuple
+        :param pi: (KeyParseInfo) key parse info
         :return:
         """
         assert k in self
-        self._ki[k][_KICSI] = csi
+        self._ki[k][_KIPI] = pi
 
     def get_key_parseinfo(self, k):
         assert k in self
-        return self._ki[k][_KICSI]
+        return self._ki[k][_KIPI]
 
     def scopy(self):
         news = Sect(self.name)

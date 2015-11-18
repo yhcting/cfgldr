@@ -21,7 +21,7 @@ def _match_valrule(v, rule):
     return None is not re.match('^' + rule + '$', v, re.S)
 
 
-def _verify_sect(csct, cscsi, vsct, vscsi):
+def _verify_sect(csct, cspi, vsct, vspi):
     # check mandatory key
     mank = {}  # mandatory keys.
     for vk in vsct:
@@ -30,7 +30,7 @@ def _verify_sect(csct, cscsi, vsct, vscsi):
 
     for ck in csct:
         mfound = False
-        ccsi = csct.get_key_parseinfo(ck)
+        cpi = csct.get_key_parseinfo(ck)
         for vk in vsct:
             if not _match_keyrule(ck, vk):
                 continue
@@ -46,11 +46,11 @@ def _verify_sect(csct, cscsi, vsct, vscsi):
                 # Mandatory is found.
                 mank[vk] = True
 
-            vcsi = vsct.get_key_parseinfo(vk)
+            vpi = vsct.get_key_parseinfo(vk)
             if isinstance(cv, Sect):
-                _verify_sect(cv, ccsi, vv, vcsi)
+                _verify_sect(cv, cpi, vv, vpi)
             elif not _match_valrule(cv, vv):
-                raise VerificationError(ccsi, vcsi,
+                raise VerificationError(cpi, vpi,
                                         'Rule-verification fails')
             P.d('Matched: key(%s, %s), value(%s, %s)' %
                 (ck, vk, cv, vv))
@@ -59,13 +59,13 @@ def _verify_sect(csct, cscsi, vsct, vscsi):
             break
 
         if not mfound:
-            raise VerificationError(ccsi, vscsi,
+            raise VerificationError(cpi, vspi,
                                     'No-rule found')
     for vk in mank:
         if not mank[vk]:
-            vcsi = vsct.get_key_parseinfo(vk)
+            vpi = vsct.get_key_parseinfo(vk)
             # Some mandatory key is NOT defined.
-            raise VerificationError(cscsi, vcsi,
+            raise VerificationError(cspi, vpi,
                                     'Missing mandatory key')
 
 

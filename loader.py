@@ -1,4 +1,8 @@
+#
+# Main interface file for cfgldr module.
+#
 import parser
+import section
 
 
 def load_config(fconf, fverifier,
@@ -10,7 +14,7 @@ def load_config(fconf, fverifier,
     :param confdict: (dict) That can be used as named-replacement-dict for conf
     :param verifierdict: (dict) That can be used as named-replacement-dict for
                          verifier
-    :return: (dict)
+    :return: (section.Sect) root section
     """
     return parser.parse_conf(fconf, fverifier,
-                             confdict, verifierdict).to_dict()
+                             confdict, verifierdict)

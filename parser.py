@@ -7,7 +7,8 @@ import verifier
 import pyparsing as pp
 import section
 from section import Sect
-from errors import BaseError, ParseBaseError, ParseError, FileIOError
+from parseinfo import ConfPos, ParsePos, SectPath, ParseInfo
+from errors import BaseError, ParseError, FileIOError
 
 P = logger.P(__name__)
 #P.set_level(P.VERBOSE)
@@ -22,9 +23,7 @@ class Context(object):
     """Context used to parse a config file."""
     def __init__(self, fconf):
         self.ss = [Sect(None)]
-        self.fconf = os.path.abspath(fconf)
-        self.ps = None  # parse string of current context
-        self.loc = 0  # current parse location (interesting location)
+        self.cfpo = ConfPos(os.path.abspath(fconf), None, 0)
 
     def __getattr__(self, aname):
         """Dummy function for future use."""
@@ -32,11 +31,11 @@ class Context(object):
 
     @property
     def file(self):
-        return self.fconf
+        return self.cfpo.file
 
     @property
     def cwd(self):
-        return os.path.dirname(self.fconf)
+        return os.path.dirname(self.cfpo.file)
 
     @property
     def sroot(self):
@@ -60,9 +59,9 @@ class Context(object):
     def spush(self, s):
         self.ss.append(s)
 
-    def setinfo(self, ps, loc):
-        self.ps = ps
-        self.loc = loc
+    def setloc(self, ps, loc):
+        self.cfpo.ps = ps
+        self.cfpo.loc = loc
 
 
 class ContextManager(object):
@@ -85,20 +84,26 @@ class ContextManager(object):
                  None if there is no matching context.
         """
         for c in self.cstk:
-            if c.file == fconf:
+            if c.cfpo.file == fconf:
                 return c
         return None
 
-    def get_context_stack_info(self):
-        """
-        :return: [(file, ps, loc) ...] array of tuples
-        """
-        r = []
-        for s in self.cstk:
-            # should be reverse of stack order
-            r.append((s.file, s.ps, s.loc))
-        assert len(r) > 0
-        return r
+    def create_parseinfo(self, ps=None, loc=None, tag=None):
+        po = ParsePos([c.cfpo.clone() for c in self.cstk])
+        sectpath = []
+        for c in self.cstk:
+            for s in c.ss:
+                if None is s.name:
+                    continue
+                sectpath.append(s.name)
+        sp = SectPath(sectpath)
+        pi = ParseInfo(po, sp)
+        if (not None is ps
+                and not None is loc):
+            pi.set_current_pos(ps, loc)
+        if not None is tag:
+            pi.set_current_tag(tag)
+        return pi
 
     def parse_start(self, ps, loc, fconf):
         """
@@ -110,7 +115,7 @@ class ContextManager(object):
         P.d('parse_start: %s' % fconf)
         if len(self.cstk) > 0:
             c = self.context
-            c.setinfo(ps, loc)
+            c.setloc(ps, loc)
         self.cstk.append(Context(fconf))
 
     def parse_end(self):
@@ -145,19 +150,14 @@ def _is_abspath(v):
 def _include_conf(ps, loc, v):
     c = _cm.context
     fconf = v if _is_abspath(v) else os.path.join(c.cwd, v)
-    try:
-        c = _parse_conf(ps, loc, fconf)
-    except ParseBaseError as e:
-        e.append_ei(_cm.context.file, ps, loc)
-        raise
-    return c
+    return _parse_conf(ps, loc, fconf)
 
 
 def _merge_section(dst, src, ps, loc):
     try:
         dst.supdate(src)
     except KeyError as e:
-        raise ParseError(_cm.context.file, ps, loc, e.message)
+        raise ParseError(_cm.create_parseinfo(ps, loc, e.message))
 
 
 # return None if success, otherwise error message.
@@ -191,8 +191,8 @@ def _cmdhandle_rmkeys(ps, loc, v):
         if key in s:
             del s[key]
         else:
-            raise ParseError(cc.file, ps, loc,
-                             'Unknown key : ' + key)
+            raise ParseError(_cm.create_parseinfo(
+                ps, loc, 'Unknown key : ' + key))
 
 
 _cmdhandler_map = {
@@ -209,17 +209,16 @@ _cmdhandler_map = {
 
 def _cmd_parse_action(ps, loc, toks):
     assert(2 == len(toks))
-    cc = _cm.context
     cmd = toks[0].strip()
     value = toks[1].strip()
     if not cmd in _cmdhandler_map:
-        raise ParseError(cc.file, ps, loc,
-                         'Unknown command : ' + cmd)
+        raise ParseError(_cm.create_parseinfo(
+            ps, loc, 'Unknown command : ' + cmd))
     # noinspection PyCallingNonCallable
     errmsg = _cmdhandler_map[cmd](ps, loc, value)
     if errmsg:
-        raise ParseError(cc.file, ps, loc,
-                         '[%s] %s' % (cmd, errmsg))
+        raise ParseError(_cm.create_parseinfo(
+            ps, loc, '[%s] %s' % (cmd, errmsg)))
 
 
 def _sect_parse_action(ps, loc, toks):
@@ -227,36 +226,35 @@ def _sect_parse_action(ps, loc, toks):
     (sect_s, name, sect_e) = toks
 
     cc = _cm.context
+    pi = _cm.create_parseinfo(ps, loc)
     # check error cases.
     thisdepth = len(sect_s)
     if thisdepth != len(sect_e):
-        raise ParseError(cc.file, ps, loc,
-                         'Incorrect section depth')
+        pi.set_current_tag('Incorrect section depth')
+        raise ParseError(pi)
     if thisdepth > cc.sdepth + 1:
-        raise ParseError(cc.file, ps, loc,
-                         'Section too nested')
+        pi.set_current_tag('Section too nested')
+        raise ParseError(pi)
     # move to parent section of this depth
     while cc.sdepth >= thisdepth:
         cc.spop()
-
-    csi = _cm.get_context_stack_info()
-    # replace current context info with this parsing value
-    csi.pop()
-    csi.append((cc.file, ps, loc))
+    # NOTE
+    # Section path is updated. So, re-create parseinfo here.
+    pi = _cm.create_parseinfo(ps, loc)
     parentsect = cc.cws
     if parentsect.is_readonly(name):
-        raise ParseError(cc.file, ps, loc,
-                         'Section name(%s) already in use.' % name)
+        pi.set_current_tag('Section name(%s) already in use.' % name)
+        raise ParseError(pi)
     elif not parentsect.is_section(name):
         parentsect[name] = Sect(name)
-        parentsect.set_key_parseinfo(name, csi)
+        parentsect.set_key_parseinfo(name, pi)
     else:
         # 'name' is existing-subsection.
         # And now it is shown at config file
         # So, it should be set as readonly
         parentsect.set_readonly(name, False)
         # Use latest(defined lastly) information
-        parentsect.set_key_parseinfo(name, csi)
+        parentsect.set_key_parseinfo(name, pi)
     P.d('Sect "%s" is added to Sect "%s"\n' % (name, parentsect.name))
     cc.spush(parentsect[name])
 
@@ -290,20 +288,17 @@ def _keyvalue_parse_action(ps, loc, toks):
         v = toks[1]
     s = cc.cws
     P.d('Key "%s" is added to Sect "%s"\n' % (k, s.name))
-    csi = _cm.get_context_stack_info()
-    # replace current context info with this parsing value
-    csi.pop()
-    csi.append((cc.file, ps, loc))
-
+    pi = _cm.create_parseinfo(ps, loc)
     # execute named replacement with current working section
     try:
         v = v.format(**s)
         s[k] = v
-        s.set_key_parseinfo(k, csi)
+        s.set_key_parseinfo(k, pi)
         for ki in kis:
             s.set_ki(k, ki, kis[ki])
     except KeyError as e:
-        raise ParseError(cc.file, ps, loc, e.message)
+        pi.set_current_tag(e.message)
+        raise ParseError(pi)
 
 
 # ===============================
@@ -427,8 +422,8 @@ def _parse_conf(ps, loc, fconf):
     # This may be happened by including recursively
     if None != _cm.get_conf_context(fconf):
         # cyclic parsing is detected.
-        raise ParseError(_cm.context.file, ps, loc,
-                         'Cyclic(Recursive) parsing is detected')
+        raise ParseError(_cm.create_parseinfo(
+            ps, loc, 'Cyclic(Recursive) parsing is detected'))
 
     _cm.parse_start(ps, loc, fconf)
     try:
@@ -443,18 +438,18 @@ def _parse_conf(ps, loc, fconf):
                 content = content % repldict
             except KeyError as e:
                 msg = 'Unknown symbol at named-replacement: %%(%s)s' % e.message
-                raise ParseError(_cm.context.file, None, 0, msg)
+                raise ParseError(_cm.create_parseinfo(None, 0, msg))
         _get_parser().parseString(content, True)
         return _cm.context
     except IOError:
-        raise FileIOError(_cm.context.file, None, -1,
-                          'Fail to access config file')
+        raise FileIOError(_cm.create_parseinfo(
+            None, -1, 'Fail to access config file'))
     except pp.ParseBaseException as e:
         # Ugly hack.
         # But, this is better response.
         if e.msg == 'Expected end of text':
             e.msg = 'Syntax error'
-        raise ParseError(_cm.context.file, e.pstr, e.loc, e.msg)
+        raise ParseError(_cm.create_parseinfo(e.pstr, e.loc, e.msg))
     finally:
         _cm.parse_end()
 
@@ -520,13 +515,13 @@ def test():
                 assert False
             return sroot
         except BaseError as e:
-            emsg = 'Fail parse : %s\n' % str(e)
+            emsg = 'Fail parse\n%s\n' % str(e)
             if _SHOW_TEST_NOK_MSG:
                 P.e(emsg)
             else:
                 P.d(emsg)
             if expectok:
-                P.e('Fail parse : %s\n' % fconf)
+                P.e('Fail parse\n%s\n' % fconf)
                 raise e
 
     def test_file(fconf):
