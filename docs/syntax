@@ -14,7 +14,7 @@ Syntax
 Comment: '# comment....'
 Command: '@name' + '(argument)'
 Section: '[' + name(Token) + ']' + comment(optional)
-Key/Value: 'key' + '='(Token) + 'value' + comment(optional)
+Key/Value: 'key' + <spaces> + '='(Token) + <spaces> + 'value' + comment(optional)
 Named-replacement: following named-replacement syntax of python - %()s.
 
 

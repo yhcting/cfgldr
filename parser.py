@@ -369,7 +369,7 @@ def _build_recursive_descent_parser(vrfconf):
     tsquoted = pp.QuotedString("'''",  escChar='\\', multiline=True)
     tdquoted = pp.QuotedString('"""',  escChar='\\', multiline=True)
     # unquoted value SHOULD NOT include 'spacestr' leading comments
-    unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'(?!#))*')
+    unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'+(?!\s*#))*')
     value = tdquoted ^ tsquoted ^ dquoted ^ squoted ^ unquoted
     keyvalue = key + spaces \
         + pp.Literal('=').suppress() + pp.Optional(spaces + value)

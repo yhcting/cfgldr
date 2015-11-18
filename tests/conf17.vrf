@@ -1,7 +1,7 @@
 # ------------------------
 # complex config component
 # ------------------------
-
+mulkey = .+
 @inherit (conf16e00.vrf)
 
 [ sec\w+ ]

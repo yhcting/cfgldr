@@ -18,7 +18,7 @@ def _match_valrule(v, rule):
         if rule[0] == '^':
             # NotImplementedError
             return False
-    return None is not re.match('^' + rule + '$', v, re.M | re.S)
+    return None is not re.match('^' + rule + '$', v, re.S)
 
 
 def _verify_sect(csct, cscsi, vsct, vscsi):

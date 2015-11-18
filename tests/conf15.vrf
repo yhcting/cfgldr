@@ -1,7 +1,7 @@
 # ------------------------
 # complex config component
 # ------------------------
-
+keyupper.+ =  .+   # accept all
 key.+ = .+ # accept all
 
 [ subsec[a-z]+ ]

@@ -1,9 +1,6 @@
 # -------------
-# Mandatory key
 # Multiline key
 # -------------
 mulkey = '''
        hoho
 heheh      '''
-
-@include (conf16e00)
