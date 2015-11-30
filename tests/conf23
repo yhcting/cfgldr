@@ -1,0 +1,24 @@
+# --------------
+# key value with section path
+# --------------
+keya = keya
+keyb = keyb
+
+[ sec0 ]
+    keya = key0a
+    keyb = key0b
+
+    [[ sec00 ]]
+        keya = key00a
+        keyb = key00b
+
+        [[[ sec000 ]]]
+            keya = key000a
+
+[ sec1 ]
+    keya = (!:sec0:sec00:keya)
+    keyb = (!:sec0:sec00:sec000:keya)
+
+    [[ sec10 ]]
+        keya = (!:keya)
+        keyb = (!:sec1:keya)

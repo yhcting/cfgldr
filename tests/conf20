@@ -19,12 +19,12 @@ _tmpk = MyTemp
 #_tmpk01 = test1
 #_tmpk02 = test2
 # referencing previous keys by using named replacement
-key05 = ++{_tmpk}++
-key07 = **{key05}**
-key08 = ++{{_tmpk}}++
+key05 = ++(!_tmpk)++
+key07 = **(!key05)**
+key08 = ++((!_tmpk)++
 
 [ sec0 ]
 _tmpk = SecTmp
-key0 = ++{_tmpk}++
+key0 = ++(!_tmpk)++
 
 

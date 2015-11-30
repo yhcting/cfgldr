@@ -4,19 +4,19 @@
 
 key0 = k0
 ~tmpk = hoho
-key1 = ++{tmpk}++
+key1 = ++(!tmpk)++
 ~tmpk = hehe  # temp key is always writable
-key2 = ++{tmpk}++
+key2 = ++(!tmpk)++
 ~tmpk1 = hello
 
 [ sec0 ]
 ~tmpk = ooo
 ~tmpk1 = 111
 ~key0 = kk0
-~key0 = +{key0}+
-~key0 = +{key0}+
-key1 = {key0}
+~key0 = +(!key0)+
+~key0 = +(!key0)+
+key1 = (!key0)
 
 # set key0 to permanent key.
-key0 = **{key0}**
+key0 = **(!key0)**
 

@@ -6,6 +6,7 @@ import logger
 import verifier
 import pyparsing as pp
 import section
+import strfmt
 from section import Sect
 from parseinfo import ConfPos, ParsePos, SectPath, ParseInfo
 from errors import BaseError, ParseError, FileIOError
@@ -15,8 +16,8 @@ P = logger.P(__name__)
 P.set_level(P.ERROR)
 
 
-_SHOW_TEST_NOK_MSG = False
-#_SHOW_TEST_NOK_MSG = True
+#_SHOW_TEST_NOK_MSG = False
+_SHOW_TEST_NOK_MSG = True
 
 
 class Context(object):
@@ -267,6 +268,42 @@ _KIMAP = {_KIMAN_CH: section.KIMAN,
           _KITMP_CH: section.KITMP}
 
 
+_KEYPATH_DELIMITER = ':'
+
+
+class KeyPathDic(object):
+    def __init__(self, rootsect, cursect):
+        self.rs = rootsect
+        self.cs = cursect
+
+    def __getitem__(self, item):
+        pl = item.split(_KEYPATH_DELIMITER)
+        if 0 == len(pl):
+            raise KeyError('[%s] is invalid' % item)
+        if 0 == len(pl[0]):
+            # absolute path
+            cs = self.rs
+            pl = pl[1:]
+        else:
+            cs = self.cs
+        for s in pl:
+            if 0 == len(s):
+                raise KeyError('[%s] is invalid' % item)
+            cs = cs[s]
+        return cs
+
+
+class KeyPathDicConf(KeyPathDic):
+    def __init__(self, rootsect, cursect):
+        super(KeyPathDicConf, self).__init__(rootsect, cursect)
+
+    def __getitem__(self, item):
+        cs = super(KeyPathDicConf, self).__getitem__(item)
+        if isinstance(cs, Sect):
+            raise KeyError('[%s] is section!' % item)
+        return cs
+
+
 def _keyvalue_parse_action(ps, loc, toks):
     assert(1 == len(toks)
            or 2 == len(toks))
@@ -287,17 +324,18 @@ def _keyvalue_parse_action(ps, loc, toks):
     else:
         v = toks[1]
     s = cc.cws
+    kpd = KeyPathDicConf(cc.sroot, s)
     P.d('Key "%s" is added to Sect "%s"\n' % (k, s.name))
     pi = _cm.create_parseinfo(ps, loc)
     # execute named replacement with current working section
     try:
-        v = v.format(**s)
+        v = strfmt.strfmt(v, kpd)
         s[k] = v
         s.set_key_parseinfo(k, pi)
         for ki in kis:
             s.set_ki(k, ki, kis[ki])
     except KeyError as e:
-        pi.set_current_tag(e.message)
+        pi.set_current_tag(str(e))
         raise ParseError(pi)
 
 
@@ -556,8 +594,6 @@ def test():
                          and not name.endswith('.vrf')):
                 test_file(f)
 
-    test_dir('tests')
-
     if len(sys.argv) > 1:
         #print('######## TEST WITH EXTERNAL SAMPLES ########\n')
         for f in sys.argv[1:]:
@@ -567,6 +603,8 @@ def test():
                 test_file(f)
             else:
                 print('Invalid file path(Skipped) : %s\n' % f)
+    else:
+        test_dir('tests')
 
 
 # ============================================================================

@@ -1,0 +1,6 @@
+# --------------
+# key value with section path
+# --------------
+@inherit (conf23)
+
+keyc = (!:keyunknown)
