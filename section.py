@@ -33,6 +33,14 @@ class Sect(OrderedDict):
         self._init_ki(k)
         self._setro(k)
 
+    def force_setitem(self, k, v):
+        """\
+        Replace key value without modifying key-info-attributes
+        This is very dangerous function(may break internal data-relation).
+        So, if you are not sure, DO NOT USE this.
+        """
+        dict.__setitem__(self, k, v)
+
     def __delitem__(self, k):
         self._ki.pop(k, None)
         OrderedDict.__delitem__(self, k)

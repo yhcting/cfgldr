@@ -14,7 +14,7 @@ Syntax
 Comment: '# comment....'
 Command: '@name' + '(argument)'
 Section: '[' + name(Token) + ']' + comment(optional)
-Key/Value: 'key' + <spaces> + '='(Token) + <spaces> + 'value' + comment(optional)
+Key/Value: 'key' + <spaces> + '(= | :=)'(Token) + <spaces> + 'value' + comment(optional)
 Named-replacement: following named-replacement syntax of python - %()s.
 
 
@@ -31,8 +31,6 @@ Key/Value
       This key cannot be overwrite at any case.
 ~key: Temp key. Key is removed after parsing current config file.
       Temp key is always overwritable.
-
-
 
 Each tokes SHOULD BE SEPARATED with AT LEAST one space/tab characters
 That is, '+' means one ore more whitespaces.
@@ -57,5 +55,11 @@ By default, key path is searched from current section.
 So, (!key) is 'key in current section'
 Leading ':' is used to denote absolute key-path(path from root section).
 Example: (!section:key) (!:parent_sec:sec:key)
+
+* Evaluation type
+':=': Immediate non-recursive evaluation.
+      Key replacement is evaluated non-recursively and immediately.
+'=': Key replacement is evalulated at the end of parsing current file.
+
 
 

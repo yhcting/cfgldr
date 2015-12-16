@@ -39,3 +39,17 @@ class VerificationError(BaseError):
         s += '\n< Verifier >\n'
         s += str(self.vpi)
         return s
+
+
+class EvalError(BaseError):
+    """Key value evaluation error."""
+    def __init__(self, pi, evhis, ref):
+        self.pi = pi
+        self.evhis = evhis
+        self.ref = ref
+
+    def __str__(self):
+        return '''\
+%s
+Reference path: %s
+Reference key: %s''' % (str(self.pi), '->'.join(self.evhis), self.ref)

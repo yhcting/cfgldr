@@ -6,7 +6,7 @@ import logger
 import verifier
 import pyparsing as pp
 import section
-import strfmt
+import kvfmt
 from section import Sect
 from parseinfo import ConfPos, ParsePos, SectPath, ParseInfo
 from errors import BaseError, ParseError, FileIOError
@@ -89,6 +89,15 @@ class ContextManager(object):
                 return c
         return None
 
+    def get_current_sect_path(self):
+        sectpath = []
+        for c in self.cstk:
+            for s in c.ss:
+                if None is s.name:
+                    continue
+                sectpath.append(s.name)
+        return sectpath
+
     def create_parseinfo(self, ps=None, loc=None, tag=None):
         po = ParsePos([c.cfpo.clone() for c in self.cstk])
         sectpath = []
@@ -97,7 +106,7 @@ class ContextManager(object):
                 if None is s.name:
                     continue
                 sectpath.append(s.name)
-        sp = SectPath(sectpath)
+        sp = SectPath(self.get_current_sect_path())
         pi = ParseInfo(po, sp)
         if (not None is ps
                 and not None is loc):
@@ -127,6 +136,7 @@ class ContextManager(object):
         """
         P.d('parse_end')
         c = self.cstk.pop()
+        kvfmt.kveval_all(c.sroot)
         c.sroot.clear_temp_keys(True)
 
 
@@ -268,45 +278,9 @@ _KIMAP = {_KIMAN_CH: section.KIMAN,
           _KITMP_CH: section.KITMP}
 
 
-_KEYPATH_DELIMITER = ':'
-
-
-class KeyPathDic(object):
-    def __init__(self, rootsect, cursect):
-        self.rs = rootsect
-        self.cs = cursect
-
-    def __getitem__(self, item):
-        pl = item.split(_KEYPATH_DELIMITER)
-        if 0 == len(pl):
-            raise KeyError('[%s] is invalid' % item)
-        if 0 == len(pl[0]):
-            # absolute path
-            cs = self.rs
-            pl = pl[1:]
-        else:
-            cs = self.cs
-        for s in pl:
-            if 0 == len(s):
-                raise KeyError('[%s] is invalid' % item)
-            cs = cs[s]
-        return cs
-
-
-class KeyPathDicConf(KeyPathDic):
-    def __init__(self, rootsect, cursect):
-        super(KeyPathDicConf, self).__init__(rootsect, cursect)
-
-    def __getitem__(self, item):
-        cs = super(KeyPathDicConf, self).__getitem__(item)
-        if isinstance(cs, Sect):
-            raise KeyError('[%s] is section!' % item)
-        return cs
-
-
 def _keyvalue_parse_action(ps, loc, toks):
-    assert(1 == len(toks)
-           or 2 == len(toks))
+    assert(2 == len(toks)
+           or 3 == len(toks))
     cc = _cm.context
     k = toks[0]
     assert len(k) > 0
@@ -319,17 +293,22 @@ def _keyvalue_parse_action(ps, loc, toks):
         if k[0] == prefix:
             k = k[1:]
             kis[_KIMAP[prefix]] = True
-    if 1 == len(toks):
+    op = toks[1]
+    if 2 == len(toks):
         v = ''  # empty string by default
     else:
-        v = toks[1]
+        v = toks[2]
     s = cc.cws
-    kpd = KeyPathDicConf(cc.sroot, s)
     P.d('Key "%s" is added to Sect "%s"\n' % (k, s.name))
     pi = _cm.create_parseinfo(ps, loc)
     # execute named replacement with current working section
     try:
-        v = strfmt.strfmt(v, kpd)
+        v = kvfmt.kvparse(v)
+        if op == ':=':
+            # Immediate non-recursive evaluation.
+            v = kvfmt.kveval_parsed_non_recursive(
+                cc.sroot, _cm.get_current_sect_path() + [k], v)
+            # update with evaluated value.
         s[k] = v
         s.set_key_parseinfo(k, pi)
         for ki in kis:
@@ -405,7 +384,7 @@ def _build_recursive_descent_parser(vrfconf):
     unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'+(?!\s*#))*')
     value = tdquoted ^ tsquoted ^ dquoted ^ squoted ^ unquoted
     keyvalue = key + spaces \
-        + pp.Literal('=').suppress() + pp.Optional(spaces + value)
+        + (pp.Literal('=') ^ pp.Literal(':=')) + pp.Optional(spaces + value)
 
     #
     # define high-level token. Order is very important.
