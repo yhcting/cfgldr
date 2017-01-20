@@ -1,7 +1,7 @@
 # --------------
 # recursive reference - cyclic
 # --------------
-key1 = +(!key4) # cyclic reference
-key2 = +(!key1)
-key3 = +(!key2)
-key4 = +(!key3)
+key1 = +(*key4) # cyclic reference
+key2 = +(*key1)
+key3 = +(*key2)
+key4 = +(*key3)

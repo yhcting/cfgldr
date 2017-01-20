@@ -1,1 +1,1 @@
-key0 := ++(!key0)++  # error key0 is NOT defined yet.
+key0 := ++(*key0)++  # error key0 is NOT defined yet.

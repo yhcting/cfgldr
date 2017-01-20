@@ -1,11 +1,1 @@
-# --------------
-# early reference.
-# --------------
-keya = (!sec0:sec00:keya)  # these should be same with keyd
-keyb = (!:sec0:sec00:keya)  # these should be same with keyd
-
-[ sec0 ]
-    keya = (!sec00:keya)
-    keyb = (!:sec0:sec00:keya)
-    [[ sec00 ]]
-        keya = sec0:sec00:keya
+{'keya': 'sec0:sec00:keya', 'keyb': 'sec0:sec00:keya', 'sec0': {'keya': 'sec0:sec00:keya', 'keyb': 'sec0:sec00:keya', 'sec00': {'keya': 'sec0:sec00:keya'}}}

@@ -108,10 +108,10 @@ class ContextManager(object):
                 sectpath.append(s.name)
         sp = SectPath(self.get_current_sect_path())
         pi = ParseInfo(po, sp)
-        if (not None is ps
-                and not None is loc):
+        if (None is not ps
+                and None is not loc):
             pi.set_current_pos(ps, loc)
-        if not None is tag:
+        if None is not tag:
             pi.set_current_tag(tag)
         return pi
 
@@ -155,6 +155,17 @@ def _is_abspath(v):
 
 # ============================================================================
 #
+# Parser constants
+#
+# ============================================================================
+_KIMAN_CH = '^'  # Mandatory key prefix
+_KIFIN_CH = '!'  # Final key prefix
+_KITMP_CH = '~'  # Temporal key prefix
+_KICMD_CH = '@'  # Command prefix
+
+
+# ============================================================================
+#
 # Action functions
 #
 # ============================================================================
@@ -168,7 +179,7 @@ def _merge_section(dst, src, ps, loc):
     try:
         dst.supdate(src)
     except KeyError as e:
-        raise ParseError(_cm.create_parseinfo(ps, loc, e.message))
+        raise ParseError(_cm.create_parseinfo(ps, loc, str(e)))
 
 
 # return None if success, otherwise error message.
@@ -222,7 +233,7 @@ def _cmd_parse_action(ps, loc, toks):
     assert(2 == len(toks))
     cmd = toks[0].strip()
     value = toks[1].strip()
-    if not cmd in _cmdhandler_map:
+    if cmd not in _cmdhandler_map:
         raise ParseError(_cm.create_parseinfo(
             ps, loc, 'Unknown command : ' + cmd))
     # noinspection PyCallingNonCallable
@@ -270,9 +281,6 @@ def _sect_parse_action(ps, loc, toks):
     cc.spush(parentsect[name])
 
 
-_KIMAN_CH = '^'
-_KIFIN_CH = '!'
-_KITMP_CH = '~'
 _KIMAP = {_KIMAN_CH: section.KIMAN,
           _KIFIN_CH: section.KIFIN,
           _KITMP_CH: section.KITMP}
@@ -348,7 +356,7 @@ def _build_recursive_descent_parser(vrfconf):
     #
     # command
     #
-    cmdprefix = pp.Literal('@')
+    cmdprefix = pp.Literal(_KICMD_CH)
     cmdword = cmdprefix.suppress() + word
     command = cmdword + spaces + \
         pp.QuotedString('(', endQuoteChar=')', multiline=True)
@@ -437,7 +445,7 @@ def _parse_conf(ps, loc, fconf):
 
     # check recursive(cyclic) parsing
     # This may be happened by including recursively
-    if None != _cm.get_conf_context(fconf):
+    if None is not _cm.get_conf_context(fconf):
         # cyclic parsing is detected.
         raise ParseError(_cm.create_parseinfo(
             ps, loc, 'Cyclic(Recursive) parsing is detected'))
@@ -448,13 +456,14 @@ def _parse_conf(ps, loc, fconf):
             content = f.read()
 
         # change new line style : DOS -> UNIX
+        content = content.decode('utf-8')
         content.replace('\r\n', '\n')
         repldict = _cm.repldict
-        if not repldict is None:
+        if repldict is not None:
             try:
                 content = content % repldict
             except KeyError as e:
-                msg = 'Unknown symbol at named-replacement: %%(%s)s' % e.message
+                msg = 'Unknown symbol at named-replacement: %%(%s)s' % str(e)
                 raise ParseError(_cm.create_parseinfo(None, 0, msg))
         _get_parser().parseString(content, True)
         return _cm.context
@@ -476,6 +485,8 @@ def parse_conf(fconf, fverifier, confdict, vrfdict):
     Parse config file and gives root section as result.
     :param fconf: config file path
     :param fverifier: verifier file path. None is allowed.
+    :param confdict: configuration dictionary
+    :param vrfdict: verifier dictionary
     :return: (section.Sect) root section.
     """
     fconf = os.path.abspath(fconf)
@@ -507,7 +518,7 @@ def test():
 
     def check_data(datastr, datafile):
         with open(datafile, 'rb') as fh:
-            fdata = fh.read()
+            fdata = fh.read().decode('utf-8')
         if fdata != datastr:
             P.e('%s: Success. But section data is different from expected\n%s'
                 % (datafile, datastr))

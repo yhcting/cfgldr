@@ -1,7 +1,7 @@
 # Key-value format handler
 #
-# Formatting syntax (!\w)
-# To escape '(!', use '((!'
+# Formatting syntax (*\w)
+# To escape '(*', use '((*'
 #
 from __future__ import print_function
 
@@ -57,7 +57,7 @@ def _start_parse():
 
 
 def _finish_parse():
-    assert not None is _tlo.cxt
+    assert None is not _tlo.cxt
     _tlo.cxt = None
 
 
@@ -75,7 +75,7 @@ def _fmts_parse_action(ps, loc, toks):
 
 
 def _build_parser():
-    fmts = pp.Regex(r'(?<!\()\(\![^\)]+\)')  # FORMAT-DEPENDENT
+    fmts = pp.Regex(r'(?<!\()\(\*[^\)]+\)')  # FORMAT-DEPENDENT
     anychar = pp.Regex(r'.')
     e = fmts ^ anychar
     fmts.setParseAction(_fmts_parse_action)
@@ -104,7 +104,7 @@ def kvparse(s):
         all_string = True
         for e in c.outs:
             if isinstance(e, str):
-                e = e.replace('((!', '(!')  # FORMAT-DEPENDENT
+                e = e.replace('((*', '(*')  # FORMAT-DEPENDENT
             else:
                 all_string = False
             r.l.append(e)
@@ -128,7 +128,7 @@ def _get_keyvalue(rootsect, kpath):
     cs = rootsect
     for s in kpath:
         if (not isinstance(cs, Sect)
-                or not s in cs):
+                or s not in cs):
             raise KeyError('Invalid key path')
         cs = cs[s]
     return cs
@@ -168,8 +168,8 @@ def _eval_kref(rootsect, kpath, e, evhis, evkref):
         sec, key = _parse_kpath(rootsect, kpath)
         if key in sec:
             pi = sec.get_key_parseinfo(key)
-            if not None is pi:
-                pi.set_current_tag(ke.message)
+            if None is not pi:
+                pi.set_current_tag(str(ke))
             raise EvalError(pi, evhis[:], _KP_DELIMITER.join(refpath))
         else:
             raise ke
@@ -253,22 +253,22 @@ def test():
 #        ('434nsdn', '434nsdn'),
 #        (' 1234 562kdkd,\ne333\n44kk', ' 1234 562kdkd,\ne333\n44kk'),
 #        # Simple formats : one replacement
-        ('(!a)', '@a'),
-        ('aaa(!a)bbb', 'aaa@abbb'),
-        ('aa\ta(!a)sbbb', 'aa\ta@asbbb'),
-        ('22320sdk,n ae nld 89awe   en\t (!a)sje \r\n;lskd\r m',
+        ('(*a)', '@a'),
+        ('aaa(*a)bbb', 'aaa@abbb'),
+        ('aa\ta(*a)sbbb', 'aa\ta@asbbb'),
+        ('22320sdk,n ae nld 89awe   en\t (*a)sje \r\n;lskd\r m',
          '22320sdk,n ae nld 89awe   en\t @asje \r\n;lskd\r m'),
         # Multiple replacements
-        ('(!a)(!aa)', '@a@aa'),
-        ('1(!a)22(!aa)333(!b)555', '1@a22@aa333@b555'),
-        ('1(!a)\n22(!aa)333\n(!b)555\n',
+        ('(*a)(*aa)', '@a@aa'),
+        ('1(*a)22(*aa)333(*b)555', '1@a22@aa333@b555'),
+        ('1(*a)\n22(*aa)333\n(*b)555\n',
          '1@a\n22@aa333\n@b555\n'),
         # Wierd format
-        ('(!aa bb)(!**\n**)', '@aa bb@**\n**'),
+        ('(*aa bb)(***\n**)', '@aa bb@**\n**'),
         # Escape formats
-        ('((!aa)', '(!aa)'),
-        ('((!aa)((!bb)((!b)', '(!aa)(!bb)(!b)'),
-        ('aa(!aa)bb', 'aa@aabb')
+        ('((*aa)', '(*aa)'),
+        ('((*aa)((*bb)((*b)', '(*aa)(*bb)(*b)'),
+        ('aa(*aa)bb', 'aa@aabb')
     ]
 
     tsect = Sect('___')
@@ -292,7 +292,7 @@ def test():
     # Failure cases
     # ============================
     ss = [
-        '(!unknown)'
+        '(*unknown)'
     ]
     for s in ss:
         tsect['_'] = kvparse(s)

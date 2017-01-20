@@ -3,13 +3,13 @@
 # --------------
 @inherit (conf23)
 
-keyc = (!keya)
-keyd = (!:sec1:sec10:keya)
-keye = (!sec1:sec10:keya)  # these should be same with keyd
+keyc = (*keya)
+keyd = (*:sec1:sec10:keya)
+keye = (*sec1:sec10:keya)  # these should be same with keyd
 
 [ sec0 ]
-    keyc = (!sec00:keya)
-    keyd = (!sec00:sec000:keya)
+    keyc = (*sec00:keya)
+    keyd = (*sec00:sec000:keya)
 
     [[ sec00 ]]
-        keyc = (!sec000:keya)
+        keyc = (*sec000:keya)

@@ -69,6 +69,7 @@ class Sect(OrderedDict):
         Once key is overwriting, key property is changed to read-only again.
         :param key: key that are writable.
                     'None' for 'all-keys are writable'
+        :param recursive:
         """
         ks = [key] if key else self.ks
         for k in ks:
@@ -83,6 +84,7 @@ class Sect(OrderedDict):
         This works recursively if key is section name.
         :param key: key that are readonly.
                     'None' for 'all-keys are read-only'
+        :param recursive:
         """
         ks = [key] if key else self.ks
         for k in ks:
@@ -91,7 +93,7 @@ class Sect(OrderedDict):
             self._setro(k)
 
     def is_readonly(self, k):
-        if not k in self:
+        if k not in self:
             return False
         # order is important (means priority of attribute).
         if self._ki[k][KIFIN]:
@@ -191,14 +193,14 @@ def test():
     s0['3'] = 3
 
     assert 3 == s0.pop('3', None)
-    assert not '3' in s0
-    assert None == s0.pop('3', None)
+    assert '3' not in s0
+    assert None is s0.pop('3', None)
     s0['3'] = 3
     s0.set_ki('3', KITMP, True)
     s0.set_ki('2', KITMP, True)
     s0.clear_temp_keys()
-    assert not '2' in s0
-    assert not '3' in s0
+    assert '2' not in s0
+    assert '3' not in s0
     s0['2'] = 2
     s0['3'] = 3
 

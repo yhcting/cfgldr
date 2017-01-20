@@ -47,14 +47,14 @@ multi-line quoted string: qutoed by ''' or """. \ is used as escaped char.
 
 * Value: key replacement
 Named-key-replacement is processed with key-name and key-path(section path)
-For example. "(!key)" is replaced with key value.
-(To escape this, use '((!key)')
+For example. "(*key)" is replaced with key value.
+( To escape this, use '((*key)' )
 In addition to key name, key-path is also available.
 ':' is used as delimiter of key-path.
 By default, key path is searched from current section.
-So, (!key) is 'key in current section'
+So, (*key) is 'key in current section'
 Leading ':' is used to denote absolute key-path(path from root section).
-Example: (!section:key) (!:parent_sec:sec:key)
+Example: (*section:key) (*:parent_sec:sec:key)
 
 * Evaluation type
 ':=': Immediate non-recursive evaluation.
