@@ -1,3 +1,40 @@
+################################################################################
+# Copyright (C) 2016, 2017
+# Younghyung Cho. <yhcting77@gmail.com>
+# All rights reserved.
+#
+# This file is part of cfgldr in ypylib
+#
+# This program is licensed under the FreeBSD license
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are
+# met:
+#
+# 1. Redistributions of source code must retain the above copyright
+#    notice, this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright
+#    notice, this list of conditions and the following disclaimer in the
+#    documentation and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+# "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+# LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+# A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+# OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+# SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+# LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+# DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+# THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+# (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+# OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+#
+# The views and conclusions contained in the software and documentation
+# are those of the authors and should not be interpreted as representing
+# official policies, either expressed or implied, of the FreeBSD Project.
+################################################################################
+
+
 from __future__ import print_function
 import sys
 import os.path
@@ -12,11 +49,11 @@ from parseinfo import ConfPos, ParsePos, SectPath, ParseInfo
 from errors import BaseError, ParseError, FileIOError
 
 P = logger.P(__name__)
-#P.set_level(P.VERBOSE)
+# P.set_level(P.VERBOSE)
 P.set_level(P.ERROR)
 
 
-#_SHOW_TEST_NOK_MSG = False
+# _SHOW_TEST_NOK_MSG = False
 _SHOW_TEST_NOK_MSG = True
 
 
@@ -225,7 +262,7 @@ _cmdhandler_map = {
     'include': _cmdhandle_include,
     # Supporing 'rmkeys' commands may break 'key overwriting protection'.
     # Therefore, 'rmkeys' command is disabled.
-    #'rmkeys': _cmdhandle_rmkeys
+    # 'rmkeys': _cmdhandle_rmkeys
 }
 
 
@@ -456,7 +493,7 @@ def _parse_conf(ps, loc, fconf):
             content = f.read()
 
         # change new line style : DOS -> UNIX
-        content = content.decode('utf-8')
+        content = str(content.decode('utf-8'))
         content.replace('\r\n', '\n')
         repldict = _cm.repldict
         if repldict is not None:
@@ -518,15 +555,15 @@ def test():
 
     def check_data(datastr, datafile):
         with open(datafile, 'rb') as fh:
-            fdata = fh.read().decode('utf-8')
+            fdata = str(fh.read().decode('utf-8'))
         if fdata != datastr:
             P.e('%s: Success. But section data is different from expected\n%s'
                 % (datafile, datastr))
             assert False
 
     def test_file_(fconf, fverifier, expectok):
-        #cfg.setDebug()
-        #print('Testing : %s\n' % fconf)
+        # cfg.setDebug()
+        # print('Testing : %s\n' % fconf)
         try:
             confdict = {
                 '__filename__': os.path.basename(fconf)
@@ -561,7 +598,7 @@ def test():
             vrffile = None
         expectok = not os.path.exists(nokdata_file)
         sroot = test_file_(fconf, vrffile, expectok)
-        #print(str(sroot))
+        # print(str(sroot))
         if expectok and os.path.exists(okdata_file):
             check_data(str(sroot), okdata_file)
 
@@ -585,7 +622,7 @@ def test():
                 test_file(f)
 
     if len(sys.argv) > 1:
-        #print('######## TEST WITH EXTERNAL SAMPLES ########\n')
+        # print('######## TEST WITH EXTERNAL SAMPLES ########\n')
         for f in sys.argv[1:]:
             if os.path.isdir(f):
                 test_dir(f)
