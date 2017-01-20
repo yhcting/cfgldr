@@ -1,5 +1,3 @@
-import re
-
 import logger
 import section
 import re
@@ -57,12 +55,17 @@ def _match_valrule(v, rule):
 
 
 def _verify_sect(csct, cspi, vsct, vspi):
+    # Current configuration section can be referred by verifier.
+    _rule_eval_dict['CNF'] = csct.to_dict()
+
     # check mandatory key
     mank = {}  # mandatory keys.
     for vk in vsct:
         if vsct.is_ki_set(vk, section.KIMAN):
             mank[vk] = False
 
+    # TODO: Any better way improving performance?
+    # This is O(n * m) naive and simple algorithm.
     for ck in csct:
         mfound = False
         cpi = csct.get_key_parseinfo(ck)

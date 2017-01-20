@@ -1,0 +1,3 @@
+_pat := (?:ap|bp|cp|dp|ep)
+key0 = re('^(*_pat)(?:\s+(*_pat))*$')
+key1 = '''len(set(VAL.split()).difference(set([x + '-val' for x in CNF['key0'].split()]))) == 0'''

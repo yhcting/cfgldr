@@ -1,0 +1,6 @@
+# --------------
+# Refer local key value at verifier
+# --------------
+key0 := ap bp cp
+key1 := 1 2 3 4
+

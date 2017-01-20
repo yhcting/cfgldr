@@ -9,10 +9,14 @@ Rules
 -----
 * Basic syntax is same with config-file-syntax
 
-* Token is 'regular expression(regex)' without white-space.
-  And, key value should be also regex-token.
+* Key token SHOULD be 'regular expression(regex)' without white-space.
 
-* regex try to match whole word. That is,
+* Key value is used as RULE to check on config value.
+  It SHOULD be python expression that can be evaluated by python 'eval' function.
+  Returning True as result of evaluating rule, means 'Successfully verified.'
+  False means 'Verification fails'
+
+* Key token is try to be match with whole word. That is,
   It is like leading '^' and trailing '$' are added automatically.
   So, leading '^' can be reserved for different usage (See 'prefix' part below)
 
@@ -30,14 +34,20 @@ Rules
        @inherit (verifier) # '^key = [a-z]+' is defined. 'key' is mandatory.
        key = [a-z]+        # Now, 'key' is NOT mandatory.
 
-* special prefix character is used at key value.
-  '^': following expression is NOT regex (special meaning)
-       (NOT IMPLEMENTED YET)
+* Following special function and variables are available in the rule.
+   re: function
+       Matching config value with given regular expression.
+       ex. re('^pattern$')
+   VAL: string
+       Config value under current verification.
+       ex. 'VAL > 0'
+   CNF: dictionary
+       Having all configs under current verification session.
+       Verifier can refer any configuration value in there rule.
+       ex. re('^' + CNF.key0 + '|' + CNF.key1 + '$')
 
-  << example >>
-  ^version = .*  # version is mandatory key.
-  version = '=*' # =* is used as regex.
-  version = '#+[a-b]*'
-  [ sect\w+ ]
-    @include (rule.01)
-    ver[0-9] = [0-9]+
+* Unmatched key patterns in verifier are ignored.
+  And verification is processed after loading verifier configuration.
+  Therefore, user may use temporal-unmatched key name as local key variable.
+  ex. ___var := value
+      key[0-9] = 1234(*___var)

@@ -1,0 +1,5 @@
+# --------------
+# Refer configuration value at verifier
+# --------------
+key0 := ap bp cp
+key1 := ap-val bp-val cp-val
