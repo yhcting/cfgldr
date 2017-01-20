@@ -2,15 +2,15 @@
 # complex config component
 # ------------------------
 
-keyempty = '' # accept empty
-.+ = .+ # accept all
+keyempty = re('^$') # accept empty
+.+ = re('^.+$') # accept all
 
 [ sec\w+ ]
-    .+ = .+ # accept all(non empty)
+    .+ = re('^.+$') # accept all(non empty)
     [[ sec\w+ ]]
-    ^keylow = .+
-    .+ = .+
+    ^keylow = re('^.+$')
+    .+ = re('^.+$')
 
         [[[ sec\w+ ]]]
-        ^key\w+ = .+
-        .+ = .+
+        ^key\w+ = re('^.+$')
+        .+ = re('^.+$')

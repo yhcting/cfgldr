@@ -2,15 +2,15 @@
 # complex config component
 # ------------------------
 
-keyempty = '' # accept empty
-.+ = .+ # accept all
+keyempty = re('^$') # accept empty
+.+ = re('^.+$') # accept all
 
 [ sec\w+ ]
-    .+ = .+ # accept all(non empty)
+    .+ = re('^.+$') # accept all(non empty)
     [[ sec\w+ ]]
-    ^keyup = .+  # Error: missing mandatory key
-    .+ = .+
+    ^keyup = re('^.+$')  # Error: missing mandatory key
+    .+ = re('^.+$')
 
         [[[ sec\w+ ]]]
-        ^key\w+ = .+
-        .+ = .+
+        ^key\w+ = re('^.+$')
+        .+ = re('^.+$')

@@ -1,11 +1,12 @@
 # ------------------------
 # complex config component
 # ------------------------
-keyupper.+ =  .+   # accept all
-key.+ = .+ # accept all
+keynum1 = 'int(VAL) > 0'
+keyupper.+ =  re('^.+$')   # accept all
+key.+ = re('^.+$') # accept all
 
 [ subsec[a-z]+ ]
 @inherit (conf14.vrf)
-keyupper2 = [A-Z]+
-keyupper0 = [a-z]+ # accept modification
-keyupper1 = [A-Z]+
+keyupper2 = re('^[A-Z]+$')
+keyupper0 = re('^[a-z]+$') # accept modification
+keyupper1 = re('^[A-Z]+$')

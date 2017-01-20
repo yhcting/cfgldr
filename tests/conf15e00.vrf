@@ -2,7 +2,7 @@
 # complex config component
 # ------------------------
 
-sub[a-z]+ = .+  # Error: This matches first with section key(type mismatch)
+sub[a-z]+ = re('^.+$')  # Error: This matches first with section key(type mismatch)
 
 @include (conf15.vrf)
 

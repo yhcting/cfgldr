@@ -2,23 +2,58 @@ import re
 
 import logger
 import section
+import re
 from section import Sect
 from errors import VerificationError
 
 
 P = logger.P(__name__)
+_ev_VAL = None  # variable containing current working value being verified
 
 
+# ============================================================================
+#
+# Key-rule evaluator functions
+# value is stored at VAL in verifier globals, and at _ev_VAL at here.
+#
+# ============================================================================
+def _ev_re(pattern):
+    global _ev_VAL
+    return re.match(pattern, _ev_VAL, re.S)
+
+
+def _generate_verifier_dict():
+    funcs = ['re']
+    evdict = dict()
+    for fname in funcs:
+        evdict[fname] = globals().get('_ev_%s' % fname)
+        assert None is not evdict[fname]
+    # Put position holder for value to be verified.
+    evdict['VAL'] = None
+    return evdict
+
+
+_rule_eval_dict = _generate_verifier_dict()
+
+
+# ============================================================================
+#
+#
+#
+# ============================================================================
 def _match_keyrule(k, rule):
     return None is not re.match('^' + rule + '$', k)
 
 
 def _match_valrule(v, rule):
-    if len(rule) > 0:
-        if rule[0] == '^':
-            # NotImplementedError
-            return False
-    return None is not re.match('^' + rule + '$', v, re.S)
+    assert None is not v
+    global _ev_VAL
+    _ev_VAL = v
+    _rule_eval_dict['VAL'] = v
+    try:
+        return eval(rule, _rule_eval_dict)
+    except BaseException as e:
+        raise VerificationError(None, None, 'Verifier function exception: %s' % str(e))
 
 
 def _verify_sect(csct, cspi, vsct, vspi):
@@ -47,11 +82,16 @@ def _verify_sect(csct, cspi, vsct, vspi):
                 mank[vk] = True
 
             vpi = vsct.get_key_parseinfo(vk)
-            if isinstance(cv, Sect):
-                _verify_sect(cv, cpi, vv, vpi)
-            elif not _match_valrule(cv, vv):
-                raise VerificationError(cpi, vpi,
-                                        'Rule-verification fails')
+            try:
+                if isinstance(cv, Sect):
+                    _verify_sect(cv, cpi, vv, vpi)
+                elif not _match_valrule(cv, vv):
+                    raise VerificationError(cpi, vpi,
+                                            'Rule-verification fails')
+            except VerificationError as e:
+                e.cpi = cpi
+                e.vpi = vpi
+                raise e
             P.d('Matched: key(%s, %s), value(%s, %s)' %
                 (ck, vk, cv, vv))
             # Rule matches. Move to next config key

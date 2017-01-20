@@ -1,0 +1,4 @@
+# ----------------
+# Invalid verifier expression
+# ----------------
+keyupper0 = _invalid_function('hello')

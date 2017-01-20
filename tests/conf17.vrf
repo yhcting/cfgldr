@@ -1,9 +1,9 @@
 # ------------------------
 # complex config component
 # ------------------------
-mulkey = .+
+mulkey = re('^.+$')
 @inherit (conf16e00.vrf)
 
 [ sec\w+ ]
     [[ sec\w+ ]]
-        keyup = .+  # Remove mandatory key property by overwriting
+        keyup = re('^.+$')  # Remove mandatory key property by overwriting
