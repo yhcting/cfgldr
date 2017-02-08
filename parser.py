@@ -517,13 +517,15 @@ def _parse_conf(ps, loc, fconf):
         _cm.parse_end()
 
 
-def parse_conf(fconf, fverifier, confdict, vrfdict):
+def parse_conf(fconf, fverifier, confdict, vrfdict, vrf_ruledict=None):
     """
     Parse config file and gives root section as result.
     :param fconf: config file path
     :param fverifier: verifier file path. None is allowed.
     :param confdict: configuration dictionary
     :param vrfdict: verifier dictionary
+    :param vrf_ruledict: (dict) Custom symbols(including functions) to be used
+                          as global dict to eval verifier rule.
     :return: (section.Sect) root section.
     """
     fconf = os.path.abspath(fconf)
@@ -540,7 +542,8 @@ def parse_conf(fconf, fverifier, confdict, vrfdict):
         ctxt = _parse_conf(None, -1, fverifier)
         vsct = ctxt.sroot
         vfconf = ctxt.file
-    verifier.verify_conf(csct, cfconf, vsct, vfconf)
+    verifier.verify_conf(csct, cfconf, vsct, vfconf,
+                         {} if vrf_ruledict is None else vrf_ruledict)
     _set_parser(None)
     return csct
 
@@ -550,6 +553,10 @@ def parse_conf(fconf, fverifier, confdict, vrfdict):
 #
 #
 # ============================================================================
+def _cust_vrf_large_int_rule(val):
+    return int(val) > 1000
+
+
 def test():
     import os
 
@@ -564,6 +571,10 @@ def test():
     def test_file_(fconf, fverifier, expectok):
         # cfg.setDebug()
         # print('Testing : %s\n' % fconf)
+        evalrule = {
+            'cust_large_int': globals().get('_cust_vrf_large_int_rule')
+        }
+
         try:
             confdict = {
                 '__filename__': os.path.basename(fconf)
@@ -574,7 +585,7 @@ def test():
                 vrfdict = {
                     '__filename__': os.path.basename(fverifier)
                 }
-            sroot = parse_conf(fconf, fverifier, confdict, vrfdict)
+            sroot = parse_conf(fconf, fverifier, confdict, vrfdict, evalrule)
             if not expectok:
                 P.e('Failure is expected. But success! : %s\n' % fconf)
                 assert False

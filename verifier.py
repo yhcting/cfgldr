@@ -43,21 +43,19 @@ from errors import VerificationError
 
 
 P = logger.P(__name__)
-_ev_VAL = None  # variable containing current working value being verified
 
 
 # ============================================================================
 #
 # Key-rule evaluator functions
-# value is stored at VAL in verifier globals, and at _ev_VAL at here.
+# Value is stored at 'VAL' in verifier local dictionary.
 #
 # ============================================================================
-def _ev_re(pattern):
-    global _ev_VAL
-    return re.match(pattern, _ev_VAL, re.S)
+def _ev_re(val, pattern):
+    return re.match(pattern, val, re.S)
 
 
-def _generate_verifier_dict():
+def _generate_default_verifier_dict():
     funcs = ['re']
     evdict = dict()
     for fname in funcs:
@@ -66,9 +64,6 @@ def _generate_verifier_dict():
     # Put position holder for value to be verified.
     evdict['VAL'] = None
     return evdict
-
-
-_rule_eval_dict = _generate_verifier_dict()
 
 
 # ============================================================================
@@ -80,21 +75,19 @@ def _match_keyrule(k, rule):
     return None is not re.match('^' + rule + '$', k)
 
 
-def _match_valrule(v, rule):
+def _match_valrule(v, rule, evaldict):
     assert None is not v
-    global _ev_VAL
-    _ev_VAL = v
-    _rule_eval_dict['VAL'] = v
+    evaldict['VAL'] = v
     try:
-        return eval(rule, _rule_eval_dict)
+        return eval(rule, {}, evaldict)
     except BaseException as e:
         raise VerificationError(None, None,
                                 'Verifier function exception: %s' % str(e))
 
 
-def _verify_sect(csct, cspi, vsct, vspi):
+def _verify_sect(csct, cspi, vsct, vspi, evaldict):
     # Current configuration section can be referred by verifier.
-    _rule_eval_dict['CNF'] = csct.to_dict()
+    evaldict['CNF'] = csct.to_dict()
 
     # check mandatory key
     mank = {}  # mandatory keys.
@@ -125,8 +118,8 @@ def _verify_sect(csct, cspi, vsct, vspi):
             vpi = vsct.get_key_parseinfo(vk)
             try:
                 if isinstance(cv, Sect):
-                    _verify_sect(cv, cpi, vv, vpi)
-                elif not _match_valrule(cv, vv):
+                    _verify_sect(cv, cpi, vv, vpi, evaldict)
+                elif not _match_valrule(cv, vv, evaldict):
                     raise VerificationError(cpi, vpi,
                                             'Rule-verification fails')
             except VerificationError as e:
@@ -150,16 +143,24 @@ def _verify_sect(csct, cspi, vsct, vspi):
                                     'Missing mandatory key')
 
 
-def verify_conf(csct, cfconf, vsct, vfconf):
+def verify_conf(csct, cfconf, vsct, vfconf, vrf_ruledict):
     """
     :param csct: (Sect) root section of config
     :param cfconf: (str) config file path
     :param vsct: (Sect) root section of verifier
     :param vfconf: (str) verifier file path
+    :param vrf_ruledict: (dict) Custom functions to be used at verifier.
+                         This is used as global dict to eval verifier rule.
     :return:
     """
     if None is vsct:
         assert None is vfconf
         return  # nothing to do. Accept all.
+    rule_eval_dict = _generate_default_verifier_dict()
+
+    # Override with custome rule dictionary
+    rule_eval_dict.update(vrf_ruledict)
+
     _verify_sect(csct, [(cfconf, None, 0)],
-                 vsct, [(vfconf, None, 0)])
+                 vsct, [(vfconf, None, 0)],
+                 rule_eval_dict)

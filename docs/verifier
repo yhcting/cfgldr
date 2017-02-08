@@ -34,10 +34,10 @@ Rules
        @inherit (verifier) # '^key = [a-z]+' is defined. 'key' is mandatory.
        key = [a-z]+        # Now, 'key' is NOT mandatory.
 
-* Following special function and variables are available in the rule.
+* Following special function and variables are available(predefined) in rule.
    re: function
        Matching config value with given regular expression.
-       ex. re('^pattern$')
+       ex. re(VAL, '^pattern$')
    VAL: string
        Config value under current verification.
        ex. 'VAL > 0'
@@ -51,3 +51,20 @@ Rules
   Therefore, user may use temporal-unmatched key name as local key variable.
   ex. ___var := value
       key[0-9] = 1234(*___var)
+
+
+--------------------
+Custom rule verifier
+--------------------
+Users can use their own custom rule-verifier.
+Following code is simple example.
+
+    rule_verifier = {
+        'cust_large_int': globals().get('_cust_vrf_large_int_rule')
+    }
+    ...
+    load_config(fconf, fverifier, confdict, verifierdict,
+                rule_verifier):
+
+Note that this is used as local dictionary of 'eval' context of rule verifier.
+That is, attrs. defined custom rule verifier overwrites existing predefined one.

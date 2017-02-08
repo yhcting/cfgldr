@@ -2,6 +2,6 @@
 # simple verifier
 # ---------------
 
-keylower = re('^[a-z]+$')
-keynum = re('^[0-9]+$')
-keyupper = re('^[A-Z]+$')
+keylower = re(VAL, '^[a-z]+$')
+keynum = re(VAL, '^[0-9]+$')
+keyupper = re(VAL, '^[A-Z]+$')

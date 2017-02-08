@@ -41,7 +41,8 @@ import parser
 
 
 def load_config(fconf, fverifier,
-                confdict=None, verifierdict=None):
+                confdict=None, verifierdict=None,
+                vrf_ruledict=None):
     """
     Load config file and returns corresponding 'dict' structure.
     :param fconf: (str) config file path
@@ -49,7 +50,10 @@ def load_config(fconf, fverifier,
     :param confdict: (dict) That can be used as named-replacement-dict for conf
     :param verifierdict: (dict) That can be used as named-replacement-dict for
                          verifier
+    :param vrf_ruledict: (dict) Custom symbols(including functions) to be used
+                         as global dict to eval verifier rule.
     :return: (section.Sect) root section
     """
     return parser.parse_conf(fconf, fverifier,
-                             confdict, verifierdict)
+                             confdict, verifierdict,
+                             vrf_ruledict)

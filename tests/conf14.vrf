@@ -3,8 +3,8 @@
 # ----------------
 
 
-keyupper0 = re('^ABCD$')
-keyword[0-9] = re('^\w+$')
-keyl[a-z]+[0-9] = re('^[a-z]+$') # accept only lower case value
-keynum[0-9] = re('^[0-9]+$')
+keyupper0 = re(VAL, '^ABCD$')
+keyword[0-9] = re(VAL, '^\w+$')
+keyl[a-z]+[0-9] = re(VAL, '^[a-z]+$') # accept only lower case value
+keynum[0-9] = re(VAL, '^[0-9]+$')
 

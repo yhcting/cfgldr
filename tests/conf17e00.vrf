@@ -1,4 +1,4 @@
 # ------------------------
 # complex config component
 # ------------------------
-mulkey = re('^\s*$')
+mulkey = re(VAL, '^\s*$')
