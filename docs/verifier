@@ -18,7 +18,8 @@ Rules
 
 * Key token is try to be match with whole word. That is,
   It is like leading '^' and trailing '$' are added automatically.
-  So, leading '^' can be reserved for different usage (See 'prefix' part below)
+  So, leading '^' and trailing '$' are reserved for different usage
+  (See 'prefix' part below)
 
 * Rule is checked with order - from top to bottom.
   That is, first described rule is matched at first.
@@ -35,9 +36,13 @@ Rules
        key = [a-z]+        # Now, 'key' is NOT mandatory.
 
 * Following special function and variables are available(predefined) in rule.
-   re: function
+   re: function: re(val, pattern, errmsg=None)
        Matching config value with given regular expression.
        ex. re(VAL, '^pattern$')
+   success: function: success()
+       Verification always success(Means "accept all values".)
+   fail: function: fail(errmsg=None)
+       Verification always fails.
    VAL: string
        Config value under current verification.
        ex. 'VAL > 0'
@@ -68,3 +73,5 @@ Following code is simple example.
 
 Note that this is used as local dictionary of 'eval' context of rule verifier.
 That is, attrs. defined custom rule verifier overwrites existing predefined one.
+And, string of exception - str(exception) - raised in verifier function is shown
+  if verifier fails. errors.VerificationFailException may be used for it.

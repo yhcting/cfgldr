@@ -39,7 +39,7 @@ import logger
 import section
 import re
 from section import Sect
-from errors import VerificationError
+from errors import VerificationError, VerificationFailException
 
 
 P = logger.P(__name__)
@@ -51,12 +51,24 @@ P = logger.P(__name__)
 # Value is stored at 'VAL' in verifier local dictionary.
 #
 # ============================================================================
-def _ev_re(val, pattern):
-    return re.match(pattern, val, re.S)
+def _ev_re(val, pattern, errmsg=None):
+    if re.match(pattern, val, re.S):
+        return True
+    elif not errmsg:
+        return False
+    else:
+        raise VerificationFailException(errmsg)
+
+
+def _ev_fail(errmsg=None):
+    if errmsg:
+        raise VerificationFailException(errmsg)
+    else:
+        return False
 
 
 def _generate_default_verifier_dict():
-    funcs = ['re']
+    funcs = ['re', 'fail']
     evdict = dict()
     for fname in funcs:
         evdict[fname] = globals().get('_ev_%s' % fname)
@@ -82,7 +94,7 @@ def _match_valrule(v, rule, evaldict):
         return eval(rule, {}, evaldict)
     except BaseException as e:
         raise VerificationError(None, None,
-                                'Verifier function exception: %s' % str(e))
+                                'Verifier exception: %s' % str(e))
 
 
 def _verify_sect(csct, cspi, vsct, vspi, evaldict):

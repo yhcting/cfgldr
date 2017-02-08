@@ -87,3 +87,11 @@ class EvalError(BaseError):
 %s
 Reference path: %s
 Reference key: %s''' % (str(self.pi), '->'.join(self.evhis), self.ref)
+
+
+class VerificationFailException(BaseError):
+    def __init__(self, msg):
+        self.msg = msg
+
+    def __str__(self):
+        return self.msg

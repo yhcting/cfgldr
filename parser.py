@@ -493,6 +493,7 @@ def _parse_conf(ps, loc, fconf):
             content = f.read()
 
         # change new line style : DOS -> UNIX
+        # noinspection PyUnresolvedReferences
         content = str(content.decode('utf-8'))
         content.replace('\r\n', '\n')
         repldict = _cm.repldict
@@ -562,6 +563,7 @@ def test():
 
     def check_data(datastr, datafile):
         with open(datafile, 'rb') as fh:
+            # noinspection PyUnresolvedReferences
             fdata = str(fh.read().decode('utf-8'))
         if fdata != datastr:
             P.e('%s: Success. But section data is different from expected\n%s'
