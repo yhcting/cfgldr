@@ -4,4 +4,4 @@
     @include (conf08)
 
     [[sec0 ]]  # [ERR] duplicated Section
-        key0=
+        key0 =

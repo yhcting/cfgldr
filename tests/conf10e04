@@ -1,4 +1,4 @@
-sec0=  # [ERR] this is duplicated key. sec0 is also used as section name at conf08
+sec0 =  # [ERR] this is duplicated key. sec0 is also used as section name at conf08
 @include (conf08)
 
 [sec0]

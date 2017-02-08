@@ -1,5 +1,5 @@
 @inherit (conf07)
-key0=overwrite
+key0 = overwrite
 key10 = new key
 
 [sec0]
@@ -9,7 +9,7 @@ key10 = new key
     # because, inherited section/key can be merged/overwritten
     @inherit (conf08)
     [[sec0]]
-        key0=overwrite
+        key0 = overwrite
         key10 = newkey
         @inherit (conf07)  # [ERR] key0 is duplicated here.
 

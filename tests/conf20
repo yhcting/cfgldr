@@ -1,12 +1,11 @@
 # --------------
-# * Escape character
 # * Named replacement
 # --------------
 
-# escape character is used
-key00 = 'hohoho\'hohoho'
-key01 = "hehehe''hoho\"\"\\hohoho"
-key02 = hooo\\eje\\  # there is no escape character at unquoted string
+# There is no escape character
+key00 = 'hohoho\hohoho'
+key01 = "hehehe''hoho\\hohoho"
+key02 = hooo\\eje\\
 key03 = '''hehhe\'he
 eoee\\\'
 '''

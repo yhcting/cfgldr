@@ -1,8 +1,8 @@
 @inherit (conf07)
-key0=overwrite
+key0 =overwrite
 key10 = new key
 
-key0=  # [ERR] overwrite already overwritten key.
+key0 =  # [ERR] overwrite already overwritten key.
 
 [sec0]
     @include (conf07)
@@ -11,7 +11,7 @@ key0=  # [ERR] overwrite already overwritten key.
     # because, inherited section/key can be merged/overwritten
     @inherit (conf08)
     [[sec0]]
-        key0=overwrite
+        key0 = overwrite
         key10 = newkey
 
 [sec1]

@@ -41,9 +41,10 @@ key = value#This is NOT comment
 key = value #This is comment
 
 * Value: syntax
-unquoted string: there is no escape character.
-single-line quoted string: quoted by ' or ". \ is used as escaped char.
-multi-line quoted string: qutoed by ''' or """. \ is used as escaped char.
+Note that there is no escape character. But you can represent your string by
+  mixing several different syntax.
+For example, if you use ' and " in string, you can use ''' or """
+(ex. '''here is ' and " at string''')
 
 * Value: key replacement
 Named-key-replacement is processed with key-name and key-path(section path)

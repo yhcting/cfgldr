@@ -425,10 +425,11 @@ def _build_recursive_descent_parser(vrfconf):
     ncmtspsstr = r'(?:' + spacestr + r'(?!#))+'
     ncmtsps = pp.Regex(ncmtspsstr).suppress()
 
-    squoted = pp.QuotedString("'", escChar='\\')
-    dquoted = pp.QuotedString('"', escChar='\\')
-    tsquoted = pp.QuotedString("'''",  escChar='\\', multiline=True)
-    tdquoted = pp.QuotedString('"""',  escChar='\\', multiline=True)
+    # squoted = pp.QuotedString("'", escChar='\\')
+    squoted = pp.QuotedString("'")
+    dquoted = pp.QuotedString('"')
+    tsquoted = pp.QuotedString("'''", multiline=True)
+    tdquoted = pp.QuotedString('"""', multiline=True)
     # unquoted value SHOULD NOT include 'spacestr' leading comments
     unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'+(?!\s*#))*')
     value = tdquoted ^ tsquoted ^ dquoted ^ squoted ^ unquoted
