@@ -1,11 +1,11 @@
 # --------------
 # early reference.
 # --------------
-keya = (*sec0:sec00:keya)  # these should be same with keyd
-keyb = (*:sec0:sec00:keyb)  # Key is not defined.
+keya = {*sec0:sec00:keya}  # these should be same with keyd
+keyb = {*:sec0:sec00:keyb}  # Key is not defined.
 
 [ sec0 ]
-    keya = (*sec00:keya)
-    keyb = (*:sec0:sec00:keya)
+    keya = {*sec00:keya}
+    keyb = {*:sec0:sec00:keya}
     [[ sec00 ]]
         keya = sec0:sec00:keya

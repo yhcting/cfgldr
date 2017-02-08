@@ -1,11 +1,11 @@
 # --------------
 # early reference.
 # --------------
-keya := (*sec0:sec00:keya)  # Immediate evaluation fails(Key is not defined yet.)
-keyb = (*:sec0:sec00:keya)  #
+keya := {*sec0:sec00:keya}  # Immediate evaluation fails(Key is not defined yet.)
+keyb = {*:sec0:sec00:keya}  #
 
 [ sec0 ]
-    keya = (*sec00:keya)
-    keyb = (*:sec0:sec00:keya)
+    keya = {*sec00:keya}
+    keyb = {*:sec0:sec00:keya}
     [[ sec00 ]]
         keya = sec0:sec00:keya

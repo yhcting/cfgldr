@@ -3,5 +3,5 @@
 ___allowpattern0 := (?:ap|bp|cp|dp|ep)
 ___apat1 := (?:1|2|3|4|5)
 
-key0 = re(VAL, '^(*___allowpattern0)(?:\s+(*___allowpattern0))*$')
-key1 = re(VAL, '^(*___apat1)(?:\s+(*___apat1))*$')
+key0 = re(VAL, '^{*___allowpattern0}(?:\s+{*___allowpattern0})*$')
+key1 = re(VAL, '^{*___apat1}(?:\s+{*___apat1})*$')

@@ -111,7 +111,7 @@ def _fmts_parse_action(ps, loc, toks):
 
 
 def _build_parser():
-    fmts = pp.Regex(r'(?<!\()\(\*[^\)]+\)')  # FORMAT-DEPENDENT
+    fmts = pp.Regex(r'(?<!\{)\{\*[^\}]+\}')  # FORMAT-DEPENDENT
     anychar = pp.Regex(r'.')
     e = fmts ^ anychar
     fmts.setParseAction(_fmts_parse_action)
@@ -140,7 +140,7 @@ def kvparse(s):
         all_string = True
         for e in c.outs:
             if isinstance(e, str):
-                e = e.replace('((*', '(*')  # FORMAT-DEPENDENT
+                e = e.replace('{{*', '{*')  # FORMAT-DEPENDENT
             else:
                 all_string = False
             r.l.append(e)

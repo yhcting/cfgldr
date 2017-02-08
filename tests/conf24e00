@@ -3,4 +3,4 @@
 # --------------
 @inherit (conf23)
 
-keyc = (*:keyunknown)
+keyc = {*:keyunknown}

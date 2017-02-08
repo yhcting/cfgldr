@@ -16,9 +16,9 @@ keyb = keyb
             keya = key000a
 
 [ sec1 ]
-    keya = (*:sec0:sec00:keya)
-    keyb = (*:sec0:sec00:sec000:keya)
+    keya = {*:sec0:sec00:keya}
+    keyb = {*:sec0:sec00:sec000:keya}
 
     [[ sec10 ]]
-        keya = (*:keya)
-        keyb = (*:sec1:keya)
+        keya = {*:keya}
+        keyb = {*:sec1:keya}

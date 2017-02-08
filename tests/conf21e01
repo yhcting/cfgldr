@@ -1,4 +1,4 @@
 # --------------
 # recursive reference - self
 # --------------
-key1 = ++(*key1)++  # self recursive reference.
+key1 = ++{*key1}++  # self recursive reference.
