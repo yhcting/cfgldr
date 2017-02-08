@@ -421,6 +421,10 @@ def _build_recursive_descent_parser(vrfconf):
         keyattr_prefix = '[\\' + _KIFIN_CH + '\\' + _KITMP_CH + ']'
         key = pp.Regex(keyattr_prefix + '?' + wordrestr)
 
+    # non-comment spaces
+    ncmtspsstr = r'(?:' + spacestr + r'(?!#))+'
+    ncmtsps = pp.Regex(ncmtspsstr).suppress()
+
     squoted = pp.QuotedString("'", escChar='\\')
     dquoted = pp.QuotedString('"', escChar='\\')
     tsquoted = pp.QuotedString("'''",  escChar='\\', multiline=True)
@@ -429,13 +433,12 @@ def _build_recursive_descent_parser(vrfconf):
     unquoted = pp.Regex(r'([^\n \t]|' + spacestr + r'+(?!\s*#))*')
     value = tdquoted ^ tsquoted ^ dquoted ^ squoted ^ unquoted
     keyvalue = key + spaces \
-        + (pp.Literal('=') ^ pp.Literal(':=')) + pp.Optional(spaces + value)
+        + (pp.Literal('=') ^ pp.Literal(':=')) \
+        + pp.Optional(ncmtsps + value)
 
     #
     # define high-level token. Order is very important.
     #
-    # non-comment spaces
-    ncmtsps = pp.Regex(r'(?:' + spacestr + r'(?!#))+')
     item = sect ^ command ^ keyvalue
     entry = comment\
         ^ (pp.Optional(ncmtsps) + pp.Optional(item)

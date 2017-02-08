@@ -39,3 +39,5 @@ handled as comment
 
 # special syntax that # is included as key value
 key16 = value#This is NOT COMMET
+
+key17 =   # This is comment
