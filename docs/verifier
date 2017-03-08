@@ -39,10 +39,10 @@ Rules
    re: function: re(val, pattern, errmsg=None)
        Matching config value with given regular expression.
        ex. re(VAL, '^pattern$')
-   success: function: success()
-       Verification always success(Means "accept all values".)
    fail: function: fail(errmsg=None)
        Verification always fails.
+   cond: function: cond('my' in VAL.split(), 'Errmsg')
+       Raise error exception with error message if condition fails
    VAL: string
        Config value under current verification.
        ex. 'VAL > 0'

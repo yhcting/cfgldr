@@ -67,8 +67,17 @@ def _ev_fail(errmsg=None):
         return False
 
 
+def _ev_cond(cond, errmsg=None):
+    if not cond:
+        if errmsg:
+            raise VerificationFailException(errmsg)
+        else:
+            return False
+    return True
+
+
 def _generate_default_verifier_dict():
-    funcs = ['re', 'fail']
+    funcs = ['re', 'fail', 'cond']
     evdict = dict()
     for fname in funcs:
         evdict[fname] = globals().get('_ev_%s' % fname)
