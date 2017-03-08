@@ -43,11 +43,17 @@ class ConfPos(object):
     Position at config file
     """
     def __init__(self, fconf, ps, loc=0, tag=''):
+        """
+        :param fconf: (str) config file path
+        :param ps: (str) parse string of current parsed file
+        :param loc: (int) current parsed location (interesting location)
+        :param tag: (str) custom tag message for this position.
+        """
         assert None is not fconf
         self.file = fconf
-        self.ps = ps  # parse string of current parsed file
-        self.loc = loc  # current parsed location (interesting location)
-        self.tag = tag  # tag message for this position
+        self.ps = ps
+        self.loc = loc
+        self.tag = tag
 
     @property
     def lineno(self):
@@ -77,6 +83,9 @@ class ParsePos(object):
     Parse position
     """
     def __init__(self, cfpolist=None):
+        """
+        :param cfpolist: list(ConfPos)
+        """
         self._cfpol = [] if None is cfpolist else cfpolist
 
     def __str__(self):
@@ -113,6 +122,9 @@ class SectPath(object):
     Section path
     """
     def __init__(self, path=None):
+        """
+        :param path: list(str) list(stack-path) of section names
+        """
         self.path = [] if None is path else path
 
     def __str__(self):
@@ -126,6 +138,7 @@ class ParseInfo(object):
     def __init__(self, prpo, sectpath):
         """
         :param prpo: (ParsePos)
+        :param sectpath: (SectPath)
         """
         assert isinstance(prpo, ParsePos) and isinstance(sectpath, SectPath)
         self.prpo = prpo
@@ -136,6 +149,17 @@ class ParseInfo(object):
 * Section trace: %s
 * Include back trace:
 %s''' % (str(self.sectpath), str(self.prpo))
+
+    @staticmethod
+    def create_dummy_parseinfo(confpath):
+        """
+        Create dummy parse info containing only config file path.
+
+        :param confpath: (str)
+        :return:
+        """
+        cp = ConfPos(confpath, '')
+        return ParseInfo(ParsePos([cp]), SectPath())
 
     def set_current_pos(self, ps, loc):
         if (None is self.prpo
@@ -151,3 +175,27 @@ class ParseInfo(object):
             return
         cfpo = self.prpo.peek()
         cfpo.tag = tag
+
+
+class ParseInfoHistory(object):
+    """
+    List of parse info
+    """
+    def __init__(self):
+        self.pis = list()
+
+    def __str__(self):
+        sep = ('\n' + ('-' * 60) + '\n')
+        return sep.join([str(pi) for pi in reversed(self.pis)])
+
+    def cur_pi(self):
+        if len(self.pis) > 0:
+            return self.pis[-1]
+        else:
+            return None
+
+    def add_overlay_pi(self, pi):
+        self.pis.append(pi)
+
+    def add_overlay_history(self, pih):
+        self.pis += pih.pis

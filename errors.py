@@ -62,31 +62,49 @@ class FileIOError(ParseBaseError):
 
 class VerificationError(BaseError):
     """Verification fails"""
-    def __init__(self, cpi, vpi, msg=''):
+    def __init__(self, ckey, cpih, vkey, vpih, msg=''):
+        """
+        :param ckey: (str) Conf. key name
+        :param cpih: (ParseInfoHistory) conf. parse info
+        :param vkey: (str) Verifier key name
+        :param vpih: (ParseInfoHistory) verifier parse info
+        :param msg: (str) title message
+        """
+        self.ckey = ckey
+        self.cpih = cpih
+        self.vkey = vkey
+        self.vpih = vpih
         self.msg = msg
-        self.cpi = cpi
-        self.vpi = vpi
 
     def __str__(self):
-        s = self.msg + '\n< Config >\n'
-        s += str(self.cpi)
-        s += '\n< Verifier >\n'
-        s += str(self.vpi)
-        return s
+        return '''\
+%s
+< Config >
+Issued key: %s
+%s
+*********************************************************************
+< Verifier >
+Issued keyrule: %s
+%s''' % (self.msg, self.ckey, str(self.cpih), self.vkey, str(self.vpih))
 
 
 class EvalError(BaseError):
     """Key value evaluation error."""
-    def __init__(self, pi, evhis, ref):
-        self.pi = pi
-        self.evhis = evhis
+    def __init__(self, pih, evh, ref):
+        """
+        :param pih: list(ParseInfoHistory) Parse info history
+        :param evh: list(str) evaluation history
+        :param ref: (str) reference path
+        """
+        self.pih = pih
+        self.evh = evh
         self.ref = ref
 
     def __str__(self):
         return '''\
 %s
 Reference path: %s
-Reference key: %s''' % (str(self.pi), '->'.join(self.evhis), self.ref)
+Reference key: %s''' % (str(self.pih), '->'.join(self.evh), self.ref)
 
 
 class VerificationFailException(BaseError):

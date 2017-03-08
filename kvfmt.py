@@ -203,10 +203,10 @@ def _eval_kref(rootsect, kpath, e, evhis, evkref):
     except KeyError as ke:
         sec, key = _parse_kpath(rootsect, kpath)
         if key in sec:
-            pi = sec.get_key_parseinfo(key)
-            if None is not pi:
-                pi.set_current_tag(str(ke))
-            raise EvalError(pi, evhis[:], _KP_DELIMITER.join(refpath))
+            pih = sec.get_key_parseinfo_history(key)
+            if pih.cur_pi():
+                pih.cur_pi().set_current_tag(str(ke))
+            raise EvalError(pih, evhis[:], _KP_DELIMITER.join(refpath))
         else:
             raise ke
 

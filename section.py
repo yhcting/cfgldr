@@ -39,6 +39,7 @@ from __future__ import print_function
 import logger
 
 from datastruct import OrderedDict
+from parseinfo import ParseInfoHistory
 
 P = logger.P(__name__)
 # P.set_level(P.VERBOSE)
@@ -47,7 +48,7 @@ P.set_level(P.ERROR)
 
 # Key info attribute
 _KIWR = 'wr'  # writable
-_KIPI = 'pi'  # context stack info
+_KIPIH = 'pih'  # key parsing info history
 
 # Public ki
 KIFIN = 'fin'  # final
@@ -66,8 +67,11 @@ class Sect(OrderedDict):
         if self.is_readonly(k):
             P.d('Sect(%s): keyprop: %s' % (self.name, str(self._ki)))
             raise KeyError('Key(%s) is NOT writable' % k)
+        if k not in self._ki:
+            self._ki[k] = Sect._create_ki()
+        else:
+            Sect._init_ki_vals(self._ki[k])
         OrderedDict.__setitem__(self, k, v)
-        self._init_ki(k)
         self._setro(k)
 
     def force_setitem(self, k, v):
@@ -82,14 +86,27 @@ class Sect(OrderedDict):
         self._ki.pop(k, None)
         OrderedDict.__delitem__(self, k)
 
-    def _init_ki(self, k):
-        self._ki[k] = {
+    @staticmethod
+    def _init_ki_vals(ki):
+        ki.update({
             _KIWR: False,
-            _KIPI: None,
             KIMAN: False,
             KIFIN: False,
             KITMP: False,
-        }
+        })
+
+    @staticmethod
+    def _create_ki():
+        ki = dict()
+        Sect._init_ki_vals(ki)
+        ki[_KIPIH] = ParseInfoHistory()
+        return ki
+
+    def _overlay_ki(self, k, other_ki):
+        pih = self._ki[k][_KIPIH]
+        self._ki[k].update(other_ki)
+        pih.add_overlay_history(other_ki[_KIPIH])
+        self._ki[k][_KIPIH] = pih
 
     def _setro(self, k):
         P.d('%s:%s set to RO' % (self.name, k))
@@ -159,23 +176,37 @@ class Sect(OrderedDict):
         return (k in self
                 and isinstance(self[k], Sect))
 
-    def set_key_parseinfo(self, k, pi):
+    def overlay_key_parseinfo(self, k, pi):
         """
         :param k:
         :param pi: (KeyParseInfo) key parse info
         :return:
         """
         assert k in self
-        self._ki[k][_KIPI] = pi
+        # last element of list is final information couplied with key value.
+        self._ki[k][_KIPIH].add_overlay_pi(pi)
 
-    def get_key_parseinfo(self, k):
+    def get_key_parseinfo_history(self, k):
+        """
+        :param k: key
+        :return: list[(ParseInfoHistory)]
+        """
         assert k in self
-        return self._ki[k][_KIPI]
+        return self._ki[k][_KIPIH]
 
     def scopy(self):
         news = Sect(self.name)
         news.supdate(self)
         return news
+
+    def kupdate(self, k, other):
+        if isinstance(other[k], Sect):
+            P.d('Sect(%s) is copied' % other[k].name)
+            self[k] = other[k].scopy()
+        else:
+            self[k] = other[k]
+        # noinspection PyProtectedMember
+        self._overlay_ki(k, other._ki[k])
 
     def supdate(self, s):
         for k in s:
@@ -196,13 +227,9 @@ class Sect(OrderedDict):
                         P.d('Sect(%s) is merged' % self[k].name)
                         self[k].supdate(s[k])
                 else:
-                    self[k] = s[k]
+                    self.kupdate(k, s)
             else:
-                if isinstance(s[k], Sect):
-                    P.d('Sect(%s) is copied' % s[k].name)
-                    self[k] = s[k].scopy()
-                else:
-                    self[k] = s[k]
+                self.kupdate(k, s)
         # noinspection PyProtectedMember
         self._ki.update(s._ki)
 

@@ -40,6 +40,7 @@ import section
 import re
 from section import Sect
 from errors import VerificationError, VerificationFailException
+from parseinfo import ParseInfo
 
 
 P = logger.P(__name__)
@@ -96,17 +97,25 @@ def _match_keyrule(k, rule):
     return None is not re.match('^' + rule + '$', k)
 
 
-def _match_valrule(v, rule, evaldict):
+def _match_valrule(v, rule, evaldict, ckey, cpih, vkey, vpih):
     assert None is not v
     evaldict['VAL'] = v
     try:
         return eval(rule, {}, evaldict)
     except BaseException as e:
-        raise VerificationError(None, None,
+        raise VerificationError(ckey, cpih, vkey, vpih,
                                 'Verifier exception: %s' % str(e))
 
 
-def _verify_sect(csct, cspi, vsct, vspi, evaldict):
+def _verify_sect(csct, cspih, vsct, vspih, evaldict):
+    """
+    :param csct: (Sect) root section of config
+    :param cspih:
+    :param vsct: (Sect) root section of verifier
+    :param vspih:
+    :param evaldict: (dict) symbols to be used at verifier
+    :return:
+    """
     # Current configuration section can be referred by verifier.
     evaldict['CNF'] = csct.to_dict()
 
@@ -120,7 +129,7 @@ def _verify_sect(csct, cspi, vsct, vspi, evaldict):
     # This is O(n * m) naive and simple algorithm.
     for ck in csct:
         mfound = False
-        cpi = csct.get_key_parseinfo(ck)
+        cpih = csct.get_key_parseinfo_history(ck)
         for vk in vsct:
             if not _match_keyrule(ck, vk):
                 continue
@@ -136,17 +145,13 @@ def _verify_sect(csct, cspi, vsct, vspi, evaldict):
                 # Mandatory is found.
                 mank[vk] = True
 
-            vpi = vsct.get_key_parseinfo(vk)
-            try:
-                if isinstance(cv, Sect):
-                    _verify_sect(cv, cpi, vv, vpi, evaldict)
-                elif not _match_valrule(cv, vv, evaldict):
-                    raise VerificationError(cpi, vpi,
-                                            'Rule-verification fails')
-            except VerificationError as e:
-                e.cpi = cpi
-                e.vpi = vpi
-                raise e
+            vpih = vsct.get_key_parseinfo_history(vk)
+            if isinstance(cv, Sect):
+                _verify_sect(cv, cpih, vv, vpih, evaldict)
+            elif not _match_valrule(cv, vv, evaldict,
+                                    ck, cpih, vk, vpih):
+                raise VerificationError(ck, cpih, vk, vpih,
+                                        'Rule-verification fails')
             P.d('Matched: key(%s, %s), value(%s, %s)' %
                 (ck, vk, cv, vv))
             # Rule matches. Move to next config key
@@ -154,13 +159,13 @@ def _verify_sect(csct, cspi, vsct, vspi, evaldict):
             break
 
         if not mfound:
-            raise VerificationError(cpi, vspi,
+            raise VerificationError(ck, cpih, '', vspih,
                                     'No-rule found')
     for vk in mank:
         if not mank[vk]:
-            vpi = vsct.get_key_parseinfo(vk)
+            vpih = vsct.get_key_parseinfo_history(vk)
             # Some mandatory key is NOT defined.
-            raise VerificationError(cspi, vpi,
+            raise VerificationError('', cspih, vk, vpih,
                                     'Missing mandatory key')
 
 
@@ -181,7 +186,6 @@ def verify_conf(csct, cfconf, vsct, vfconf, vrf_ruledict):
 
     # Override with custome rule dictionary
     rule_eval_dict.update(vrf_ruledict)
-
-    _verify_sect(csct, [(cfconf, None, 0)],
-                 vsct, [(vfconf, None, 0)],
+    _verify_sect(csct, ParseInfo.create_dummy_parseinfo(cfconf),
+                 vsct, ParseInfo.create_dummy_parseinfo(vfconf),
                  rule_eval_dict)

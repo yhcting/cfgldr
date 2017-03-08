@@ -319,14 +319,14 @@ def _sect_parse_action(ps, loc, toks):
         raise ParseError(pi)
     elif not parentsect.is_section(name):
         parentsect[name] = Sect(name)
-        parentsect.set_key_parseinfo(name, pi)
+        parentsect.overlay_key_parseinfo(name, pi)
     else:
         # 'name' is existing-subsection.
         # And now it is shown at config file
         # So, it should be set as readonly
         parentsect.set_readonly(name, False)
         # Use latest(defined lastly) information
-        parentsect.set_key_parseinfo(name, pi)
+        parentsect.overlay_key_parseinfo(name, pi)
     P.d('Sect "%s" is added to Sect "%s"\n' % (name, parentsect.name))
     cc.spush(parentsect[name])
 
@@ -368,7 +368,7 @@ def _keyvalue_parse_action(ps, loc, toks):
                 cc.sroot, _cm.get_current_sect_path() + [k], v)
             # update with evaluated value.
         s[k] = v
-        s.set_key_parseinfo(k, pi)
+        s.overlay_key_parseinfo(k, pi)
         for ki in kis:
             s.set_ki(k, ki, kis[ki])
     except KeyError as e:
