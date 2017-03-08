@@ -41,3 +41,5 @@ handled as comment
 key16 = value#This is NOT COMMET
 
 key17 =   # This is comment
+key18 = 'val1' and 'val2'
+key19 = 'val1' and 'val2'  # And comment.
