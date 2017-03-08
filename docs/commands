@@ -1,6 +1,9 @@
 @include
 --------
 Include parsed result of given file at the position
+'glob' syntax is allowed as argument of 'include' command.
+At this case, directories are ignored, and only files are passed as arguments.
+In this case, files are included by sorted-ascending-order.
 
 
 @inherit

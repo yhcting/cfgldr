@@ -38,6 +38,7 @@
 from __future__ import print_function
 import sys
 import os.path
+import glob
 
 import logger
 import verifier
@@ -206,10 +207,14 @@ _KICMD_CH = '@'  # Command prefix
 # Action functions
 #
 # ============================================================================
-def _include_conf(ps, loc, v):
+def _glob_include_files(v):
     c = _cm.context
-    fconf = v if _is_abspath(v) else os.path.join(c.cwd, v)
-    return _parse_conf(ps, loc, fconf)
+    pathvalue = v if _is_abspath(v) else os.path.join(c.cwd, v)
+    files = []
+    for f in glob.glob(pathvalue):
+        if os.path.isfile(f):
+            files.append(f)
+    return files
 
 
 def _merge_section(dst, src, ps, loc):
@@ -219,25 +224,33 @@ def _merge_section(dst, src, ps, loc):
         raise ParseError(_cm.create_parseinfo(ps, loc, str(e)))
 
 
+def _include_files(ps, loc, v, writable):
+    files = _glob_include_files(v)
+    if 0 == len(files):
+        raise FileIOError(_cm.create_parseinfo(
+            None, -1, 'Fail to access config file'))
+    for f in sorted(files):
+        subs = _parse_conf(ps, loc, f).sroot
+        if writable:
+            subs.set_writable()
+        else:
+            subs.set_readonly()
+        _merge_section(_cm.context.cws, subs, ps, loc)
+
+
 # return None if success, otherwise error message.
 def _cmdhandle_inherit(ps, loc, v):
     """
     Inherit from external config file. Overwriting included keys are allowed.
     """
-    subs = _include_conf(ps, loc, v).sroot
-    subs.set_writable()
-    _merge_section(_cm.context.cws, subs, ps, loc)
+    _include_files(ps, loc, v, True)
 
 
-# return None if success, otherwise error message.
 def _cmdhandle_include(ps, loc, v):
     """
     Include external config file. Overwriting included keys are NOT allowed.
     """
-    s = _cm.context.cws
-    subs = _include_conf(ps, loc, v).sroot
-    subs.set_readonly()
-    _merge_section(s, subs, ps, loc)
+    _include_files(ps, loc, v, False)
 
 
 def _cmdhandle_rmkeys(ps, loc, v):
