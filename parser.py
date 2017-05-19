@@ -555,6 +555,7 @@ def parse_conf(fconf, fverifier, confdict, vrfdict, vrf_ruledict=None):
     vsct = None  # verifier section
     vfconf = None
     if None is not fverifier:
+        fverifier = os.path.abspath(fverifier)
         _cm.repldict = vrfdict
         _set_parser(_vpsr)
         ctxt = _parse_conf(None, -1, fverifier)
