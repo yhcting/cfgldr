@@ -77,8 +77,20 @@ def _ev_cond(cond, errmsg=None):
     return True
 
 
+def _ev_listof(val, elem_pattern_list, del_pattern='\s', errmsg=None):
+    elempat = '(?:%s)' % '|'.join(elem_pattern_list)
+    pattern = '^(?:{elempat}?|{elempat}({delpat}+{elempat})+)$'.format(
+        **{'elempat': elempat, 'delpat': del_pattern})
+    if re.match(pattern, val, re.S):
+        return True
+    elif not errmsg:
+        return False
+    else:
+        raise VerificationFailException(errmsg)
+
+
 def _generate_default_verifier_dict():
-    funcs = ['re', 'fail', 'cond']
+    funcs = ['re', 'fail', 'cond', 'listof']
     evdict = dict()
     for fname in funcs:
         evdict[fname] = globals().get('_ev_%s' % fname)
